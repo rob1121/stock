@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
--- Host:                         localhost
--- Server version:               10.2.6-MariaDB-log - mariadb.org binary distribution
--- Server OS:                    Win64
--- HeidiSQL Version:             9.4.0.5125
+-- Host:                         127.0.0.1
+-- Server version:               10.2.3-MariaDB-log - mariadb.org binary distribution
+-- Server OS:                    Win32
+-- HeidiSQL Version:             9.4.0.5174
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -74,18 +74,13 @@ CREATE TABLE IF NOT EXISTS `clients` (
   `contact` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`client_id`),
   KEY `searchable` (`contact`,`name`,`address`,`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table stock.clients: ~7 rows (approximately)
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
 INSERT INTO `clients` (`client_id`, `name`, `address`, `status`, `contact`) VALUES
-	(4, '1', '1', 1, '1'),
-	(1, 'John Doe', 'jd@gmail.com', 1, '9123411111'),
-	(7, 'Jay', 'Cavite', 1, '9231323432'),
-	(5, 'John Doe', 'jd@gmail.com', 1, '9232323222'),
-	(6, 'John Smith', 'Dasm', 1, '9232922222'),
-	(2, 'John Doe', 'jd@gmail.com', 1, '9233312321'),
-	(3, 'John Doe', 'jd@gmail.com', 1, '9234123123');
+	(9, 'John', 'Imus', 1, '288'),
+	(6, 'rob', 'dasma', 1, '9232111111');
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
 
 -- Dumping structure for table stock.orders
@@ -105,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `payment_status` int(11) NOT NULL,
   `order_status` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table stock.orders: ~5 rows (approximately)
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
@@ -114,7 +109,17 @@ INSERT INTO `orders` (`order_id`, `order_date`, `client_name`, `client_contact`,
 	(2, '2016-07-15', 'John Doe', '9808746573', '3400.00', '442.00', '3842.00', '500.00', '3342.00', '3342', '0', 2, 1, 2),
 	(3, '2016-07-16', 'John Doe', '9809876758', '3600.00', '468.00', '4068.00', '568.00', '3500.00', '3500', '0', 2, 1, 2),
 	(4, '2016-08-01', 'Indra', '19208130', '1200.00', '156.00', '1356.00', '1000.00', '356.00', '356', '0.00', 2, 1, 2),
-	(5, '2016-07-16', 'John Doe', '9808767689', '3600.00', '468.00', '4068.00', '500.00', '3568.00', '3568', '0', 2, 1, 1);
+	(5, '2016-07-16', 'John Doe', '9808767689', '3600.00', '468.00', '4068.00', '500.00', '3568.00', '3568', '0', 2, 1, 1),
+	(11, '2017-09-27', '124', '1', '15000', '1950', '16950', '0', '16950', '0', '16950', 1, 2, 1),
+	(12, '2017-09-28', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
+	(13, '2017-09-29', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
+	(14, '2017-09-27', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
+	(15, '2017-09-27', '124', '1', '3000', '390', '3390', '0', '3390', '0', '3390', 1, 2, 1),
+	(16, '2017-09-27', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
+	(17, '2017-09-26', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
+	(18, '2017-09-27', '124', '1', '7500', '975', '8475', '0', '8475', '0', '8475', 1, 2, 1),
+	(19, '2017-09-26', '124', '1', '6000', '780', '6780', '0', '6780', '0', '6780', 1, 2, 1),
+	(20, '2017-09-27', '124', '1', '1200', '156', '1356', '0', '1356', '0', '1356', 1, 2, 1);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 
 -- Dumping structure for table stock.order_item
@@ -127,9 +132,9 @@ CREATE TABLE IF NOT EXISTS `order_item` (
   `total` varchar(255) NOT NULL,
   `order_item_status` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`order_item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
 
--- Dumping data for table stock.order_item: ~9 rows (approximately)
+-- Dumping data for table stock.order_item: ~0 rows (approximately)
 /*!40000 ALTER TABLE `order_item` DISABLE KEYS */;
 INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `quantity`, `rate`, `total`, `order_item_status`) VALUES
 	(1, 1, 1, '1', '1500', '1500.00', 2),
@@ -140,7 +145,19 @@ INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `quantity`,
 	(6, 3, 6, '1', '1200', '1200.00', 2),
 	(7, 4, 5, '1', '1200', '1200.00', 2),
 	(8, 5, 7, '2', '1200', '2400.00', 1),
-	(9, 5, 8, '1', '1200', '1200.00', 1);
+	(9, 5, 8, '1', '1200', '1200.00', 1),
+	(10, 9, 1, '10', '1500', '15000', 2),
+	(11, 10, 1, '10', '1500', '15000', 2),
+	(12, 11, 1, '10', '1500', '15000', 2),
+	(13, 12, 1, '1', '1500', '1500', 2),
+	(14, 13, 1, '1', '1500', '1500', 2),
+	(15, 14, 1, '1', '1500', '1500', 2),
+	(16, 15, 1, '2', '1500', '3000', 2),
+	(17, 16, 1, '1', '1500', '1500', 2),
+	(18, 17, 1, '1', '1500', '1500', 2),
+	(19, 18, 1, '5', '1500', '7500', 2),
+	(20, 19, 2, '5', '1200', '6000', 2),
+	(21, 20, 2, '1', '1200', '1200', 2);
 /*!40000 ALTER TABLE `order_item` ENABLE KEYS */;
 
 -- Dumping structure for table stock.product
@@ -157,7 +174,7 @@ CREATE TABLE IF NOT EXISTS `product` (
   PRIMARY KEY (`product_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
--- Dumping data for table stock.product: ~8 rows (approximately)
+-- Dumping data for table stock.product: ~0 rows (approximately)
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
 INSERT INTO `product` (`product_id`, `product_name`, `product_image`, `brand_id`, `categories_id`, `quantity`, `rate`, `active`, `status`) VALUES
 	(1, 'Half pant', '../assests/images/stock/2847957892502c7200.jpg', 1, 2, '19', '1500', 2, 2),
@@ -179,7 +196,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   PRIMARY KEY (`user_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
--- Dumping data for table stock.users: ~1 rows (approximately)
+-- Dumping data for table stock.users: ~0 rows (approximately)
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
 INSERT INTO `users` (`user_id`, `username`, `password`, `email`) VALUES
 	(1, 'admin', '5f4dcc3b5aa765d61d8327deb882cf99', '');
