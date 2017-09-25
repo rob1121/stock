@@ -1,6 +1,9 @@
 var manageOrderTable;
+var productIdForDelivery;
 
 $(document).ready(function() {
+  $("#orderDeliveryDate").datepicker();
+  $("#orderQuantity").on('keydown', function(e){-1!==$.inArray(e.keyCode,[46,8,9,27,13,110,190])||/65|67|86|88/.test(e.keyCode)&&(!0===e.ctrlKey||!0===e.metaKey)||35<=e.keyCode&&40>=e.keyCode||(e.shiftKey||48>e.keyCode||57<e.keyCode)&&(96>e.keyCode||105<e.keyCode)&&e.preventDefault()});
 
 	var divRequest = $(".div-request").text();
 
@@ -338,10 +341,30 @@ $(document).ready(function() {
 		}); // /edit order form function
 	}
 
+	$("#OrderDeliveryTable").on('click', '.editBtn', function() {
+    productIdForDelivery = $(this).data("productid");
+  });
+
 	$("#saveOrderModalBtn").click(function(e) {
 		e.preventDefault();
 		addOrder();
 	});
+
+	$("#clientNameDropdown").change(function() {
+
+    $.ajax({
+      url: 'php_action/fetchClient.php',
+      type: 'post',
+      data: {clientId: $(this).val()},
+      dataType: 'json',
+      success: function(response) {
+        $("#clientContact").val(response.contact);
+      },
+      error: function(err) {
+        console.log(err);
+      }
+    });
+  });
 
 }); // /documernt
 
@@ -430,7 +453,9 @@ function addRow() {
 					'<input type="hidden" name="totalValue[]" id="totalValue'+count+'" autocomplete="off" class="form-control" />'+
 				'</td>'+
 				'<td>'+
-					'<button class="btn btn-default removeProductRowBtn" type="button" onclick="removeProductRow('+count+')"><i class="glyphicon glyphicon-trash"></i></button>'+
+					'<button class="btn btn-default removeProductRowBtn" type="button" onclick="removeProductRow('+count+')">'+
+           '<i class="glyphicon glyphicon-trash">' +
+            '</i></button>'+
 				'</td>'+
 			'</tr>';
 			if(tableLength > 0) {
@@ -667,17 +692,7 @@ function removeOrder(orderId = null) {
 						// hide modal
 						$("#removeOrderModal").modal('hide');
 						// success messages
-						$("#success-messages").html('<div class="alert alert-success">'+
-	            '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
-	            '<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
-	          '</div>');
-
-						// remove the mesages
-	          $(".alert-success").delay(500).show(10, function() {
-							$(this).delay(3000).hide(10, function() {
-								$(this).remove();
-							});
-						}); // /.alert
+            alertMessage(response.messages);
 
 					} else {
 						// error messages
@@ -779,17 +794,7 @@ function paymentOrder(orderId = null) {
 
 								$("#paymentOrderModal").modal('hide');
 
-								$("#success-messages").html('<div class="alert alert-success">'+
-			            '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
-			            '<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
-			          '</div>');
-
-								// remove the mesages
-			          $(".alert-success").delay(500).show(10, function() {
-									$(this).delay(3000).hide(10, function() {
-										$(this).remove();
-									});
-								}); // /.alert
+                alertMessage(response.messages);
 
 			          // refresh the manage order table
 								manageOrderTable.ajax.reload(null, false);
@@ -810,44 +815,46 @@ function paymentOrder(orderId = null) {
 }
 
 function addOrder() {
+  var clientId = $("#clientId").val();
+  var orderDeliveryDate = $("#orderDeliveryDate").val();
+  var orderQuantity = $("#orderQuantity").val();
+  var orderRemarks = $("#orderRemarks").val();
+
 	$.ajax({
 		url: 'php_action/editOrderDelivery.php',
 		type: 'post',
-		data: {orderId: orderId},
+		data: {
+      clientId: clientId,
+      productId: productIdForDelivery,
+      orderDeliveryDate: orderDeliveryDate,
+      orderQuantity: orderQuantity,
+      orderRemarks: orderRemarks
+    },
 		dataType: 'json',
 		success:function(response) {
 			$("#addOrderModal").modal('hide');
 
-			//update OrderDeliveryTable
-			$("#OrderDeliveryTable thead").empty();
-			$("#OrderDeliveryTable tbody").empty();
+      alertMessage(response.messages, response.success);
+      location.reload();
+		},
+    error: function(err) {
+		  console.log(err);
 
-			var th = response.headers.map(function(header) {
-				return "<th>" + header + "</th>";
-			}).join('');
-
-			var tBodyData = response.orders.map(function(order) {
-				var tds = order.map(function(item) {
-					return "<td>" + item + "</td>";
-				}).join('');
-
-				return "<tr>" + tds + "</tr>";
-			}).join('');
-
-			$("#OrderDeliveryTable thead").append(th);
-			$("#OrderDeliveryTable tbody").append(tBodyData);
-
-			$("#success-messages").html('<div class="alert alert-success">'+
-        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
-        '<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
-      '</div>');
-
-			// remove the mesages
-      $(".alert-success").delay(500).show(10, function() {
-				$(this).delay(3000).hide(10, function() {
-					$(this).remove();
-				});
-			}); // /.alert
-		}
+    }
 	});
+}
+
+function alertMessage(messages, success) {
+  $("#success-messages").html('<div class="alert alert-'+(success ? 'success':'danger')+'">'+
+    '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+    '<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ messages +
+    '</div>');
+
+  // remove the mesages
+  $(".alert-success").delay(500).show(10, function() {
+    $(this).delay(3000).hide(10, function() {
+      $(this).remove();
+    });
+  }); // /.alert
+
 }

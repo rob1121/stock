@@ -3,12 +3,11 @@
 require_once 'core.php';
 
 $valid['success'] = array('success' => false, 'messages' => array());
-
 if($_POST) {
-
   $name = $_POST['name'];
   $address = $_POST['address'];
   $contact = $_POST['contact'];
+  $id = $_POST['id'];
 
   if(!($name && $address && $contact)) {
     $valid['success'] = false;
@@ -21,26 +20,16 @@ if($_POST) {
     return false;
   }
 
-  $result = $connect->query("SELECT * FROM clients WHERE name LIKE '$name', address LIKE '$address', contact LIKE '$contact'");
+  $sql = "UPDATE clients SET name = '$name', address = '$address', contact = '$contact' WHERE client_id = $id";
 
-  if (!$result) {
-    $sql = "INSERT INTO clients (name, address, contact)
-    VALUES ('$name', '$address', $contact)";
-
-    if($connect->query($sql) === TRUE) {
-      $valid['success'] = true;
-      $valid['messages'] = "Successfully Added";
-    } else {
-      $valid['success'] = false;
-      $valid['messages'] = "Error while adding the members";
-    }
+  if($connect->query($sql) === TRUE) {
+    $valid['success'] = true;
+    $valid['messages'] = "Successfully Updated";
   } else {
-      $valid['success'] = false;
-      $valid['messages'] = "Item Already exists";
+    $valid['success'] = false;
+    $valid['messages'] = "Error while updating the members";
   }
-
   $connect->close();
 
   echo json_encode($valid);
-
 } // /if $_POST

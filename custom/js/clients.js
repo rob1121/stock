@@ -3,7 +3,7 @@ $(document).ready(function() {
   updateTableList();
   $("#createClientBtn").click(function(e) {
     e.preventDefault();
-    // actions[action]();
+    actions[action]();
   });
 
   $("#addClientModalBtn").on('click', function() {
@@ -17,11 +17,18 @@ $(document).ready(function() {
     $("#clientAddress").val($(this).data('address'));
     $("#clientContact").val($(this).data('contact'));
   });
+
+  $("#manageClientTable").on('click', ".deleteBtn", function() {
+    action = "delete";
+    actions.selectedId = $(this).data('id');
+    actions[action]();
+  });
 });
 
 var actions = {
   create: createClient,
   update: updateClient,
+  delete: deleteClient,
   selectedId: -1,
 };
 
@@ -78,6 +85,26 @@ function updateClient() {
   });
 }
 
+function deleteClient() {
+  $.ajax({
+    url: 'php_action/removeClient.php',
+    type: 'post',
+    data: {
+      id: actions.selectedId
+    },
+    dataType: 'json',
+    success:function(response) {
+      showSuccessMessage(response.messages, response.success);
+console.log(response);
+
+      if(response.success) updateTableList();
+    },
+    error: function(err) {
+      console.log(err);
+    }
+  });
+}
+
 
 function updateTableList() {
   $.ajax({
@@ -90,7 +117,17 @@ function updateTableList() {
         row += '<td>' + client.address + '</td>';
         row += '<td>' + client.contact + '</td>';
         row += '<td><span class="label label-success">' + (client.status ? 'Available' : 'Not Available') + '</span></td>';
-        row += '<td><button class="btn btn-default button1 editBtn" data-toggle="modal" data-target="#addClientModel" data-name="'+client.name+'" data-address="' + client.address + '" data-id="' + client.client_id + '" data-contact="' + client.contact + '"> <i class="glyphicon glyphicon-edit"></i> Edit </button></td>'
+        row += '<td><div class="dropdown">\n' +
+          '  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">\n' +
+          '    Action\n' +
+          '    <span class="caret"></span>\n' +
+          '  </button>\n' +
+          '  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">\n' +
+          '    <li><a href="#" class="editBtn" data-toggle="modal" data-target="#addClientModel" data-name="'+client.name+'" data-address="' + client.address + '" data-id="' + client.client_id + '" data-contact="' + client.contact + '"> <i class="glyphicon glyphicon-edit"></i> Edit </a></li>\n' +
+          '    <li><a href="#" class="deleteBtn" data-id="' + client.client_id + '"> <i class="glyphicon glyphicon-minus-sign"></i> Delete </a></li>\n' +
+          '  </ul>\n' +
+          '</div>' +
+          '</td>'
         return "<tr>" + row + "</tr>";
       }).join('');
 

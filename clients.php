@@ -35,7 +35,7 @@ require_once 'php_action/orderDeliveryScheduling.php';
 							<th>Address</th>
 							<th style="width:15%;">Contact</th>
 							<th style="width:15%;">Status</th>
-							<th style="width:15%;">Action</th>
+							<th style="width:15%;"></th>
 						</tr>
 					</thead>
 					<tbody></tbody>

@@ -51,7 +51,7 @@ function getOrderItem($db, $product_id) {
   $sql = "SELECT * FROM order_item where product_id = {$product_id}";
   $order_item = $db->query($sql);
   $orderItem = [];
-  while ($od = $order_item->fetch_assoc()) $orderItem[] = $od;
+  while ($orderItem[] = $order_item->fetch_assoc());
 
   return $orderItem;
 }
@@ -72,12 +72,31 @@ function getTotal($orderItem) {
  */
 function getOrderHistory($db, $columns) {
   $product_ids = implode(', ', $columns);
-  $sql = "SELECT order_id, product_id, quantity, order_date  FROM order_item JOIN orders USING(order_id) where product_id IN ({$product_ids})";
+  $sql = "SELECT * FROM order_item JOIN orders USING(order_id) where product_id IN ({$product_ids})";
   $orders = $db->query($sql);
   $orderItems = [];
-  while ($od = $orders->fetch_assoc()) $orderItems[] = $od;
+  while ($orderItems[] = $orders->fetch_assoc());
+
+  array_filter($orderItems);
+//  $orderItems = array_map(function($order) {
+//    $order['quantity'] =
+//    return $order;
+//  }, $orderItems);
+  $orderItems = array_filter($orderItems, function($order) {
+    return $order['order_status'] !== 2;
+  });
 
   return $orderItems;
+}
+
+function sumOFOrderToDeliver($item, $dates) {
+  $total = 0;
+  foreach($dates as $date) {
+    $delivery = dateKey($date['modified']);
+    $total += (int)$item->$delivery;
+  }
+
+  return $total;
 }
 
 /**
@@ -86,6 +105,7 @@ function getOrderHistory($db, $columns) {
  */
 function historyAsHeader($orderItems) {
   $headers = array_unique(array_column($orderItems, 'order_date'));
+  sort($headers);
   return array_map("monthDate", $headers);
 }
 
@@ -113,7 +133,6 @@ function addQuantityPerDate($products, $orderItems, $headers) {
 }
 
 function getProducts($db) {
-
   $sql = "SELECT * FROM product";
   $query = $db->query($sql);
   $data = [];
@@ -128,4 +147,12 @@ function getProducts($db) {
   return $data;
 }
 
+function clients($db) {
+  $sql = "SELECT * FROM clients";
+  $query = $db->query($sql);
+  $data = [];
+  while($data[]= $query->fetch_object());
+
+  return array_filter($data);
+}
 ?>
