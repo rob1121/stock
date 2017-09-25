@@ -4,13 +4,13 @@ $(document).ready(function() {
 
 	var divRequest = $(".div-request").text();
 
-	// top nav bar 
+	// top nav bar
 	$("#navOrder").addClass('active');
 
 	if(divRequest == 'add')  {
-		// add order	
-		// top nav child bar 
-		$('#topNavAddOrder').addClass('active');	
+		// add order
+		// top nav child bar
+		$('#topNavAddOrder').addClass('active');
 
 		// order date picker
 		$("#orderDate").datepicker();
@@ -21,16 +21,16 @@ $(document).ready(function() {
 
 			$('.form-group').removeClass('has-error').removeClass('has-success');
 			$('.text-danger').remove();
-				
+
 			var orderDate = $("#orderDate").val();
 			var clientName = $("#clientName").val();
 			var clientContact = $("#clientContact").val();
 			var paid = $("#paid").val();
 			var discount = $("#discount").val();
 			var paymentType = $("#paymentType").val();
-			var paymentStatus = $("#paymentStatus").val();		
+			var paymentStatus = $("#paymentStatus").val();
 
-			// form validation 
+			// form validation
 			if(orderDate == "") {
 				$("#orderDate").after('<p class="text-danger"> The Order Date field is required </p>');
 				$('#orderDate').closest('.form-group').addClass('has-error');
@@ -82,46 +82,46 @@ $(document).ready(function() {
 
 
 			// array validation
-			var productName = document.getElementsByName('productName[]');				
+			var productName = document.getElementsByName('productName[]');
 			var validateProduct;
-			for (var x = 0; x < productName.length; x++) {       			
-				var productNameId = productName[x].id;	    	
-		    if(productName[x].value == ''){	    		    	
+			for (var x = 0; x < productName.length; x++) {
+				var productNameId = productName[x].id;
+		    if(productName[x].value == ''){
 		    	$("#"+productNameId+"").after('<p class="text-danger"> Product Name Field is required!! </p>');
-		    	$("#"+productNameId+"").closest('.form-group').addClass('has-error');	    		    	    	
-	      } else {      	
-		    	$("#"+productNameId+"").closest('.form-group').addClass('has-success');	    		    		    	
-	      }          
+		    	$("#"+productNameId+"").closest('.form-group').addClass('has-error');
+	      } else {
+		    	$("#"+productNameId+"").closest('.form-group').addClass('has-success');
+	      }
 	   	} // for
 
-	   	for (var x = 0; x < productName.length; x++) {       						
-		    if(productName[x].value){	    		    		    	
+	   	for (var x = 0; x < productName.length; x++) {
+		    if(productName[x].value){
 		    	validateProduct = true;
-	      } else {      	
+	      } else {
 		    	validateProduct = false;
-	      }          
-	   	} // for       		   	
-	   	
-	   	var quantity = document.getElementsByName('quantity[]');		   	
+	      }
+	   	} // for
+
+	   	var quantity = document.getElementsByName('quantity[]');
 	   	var validateQuantity;
-	   	for (var x = 0; x < quantity.length; x++) {       
+	   	for (var x = 0; x < quantity.length; x++) {
 	 			var quantityId = quantity[x].id;
-		    if(quantity[x].value == ''){	    	
+		    if(quantity[x].value == ''){
 		    	$("#"+quantityId+"").after('<p class="text-danger"> Product Name Field is required!! </p>');
-		    	$("#"+quantityId+"").closest('.form-group').addClass('has-error');	    		    		    	
-	      } else {      	
-		    	$("#"+quantityId+"").closest('.form-group').addClass('has-success');	    		    		    		    	
-	      } 
+		    	$("#"+quantityId+"").closest('.form-group').addClass('has-error');
+	      } else {
+		    	$("#"+quantityId+"").closest('.form-group').addClass('has-success');
+	      }
 	   	}  // for
 
-	   	for (var x = 0; x < quantity.length; x++) {       						
-		    if(quantity[x].value){	    		    		    	
+	   	for (var x = 0; x < quantity.length; x++) {
+		    if(quantity[x].value){
 		    	validateQuantity = true;
-	      } else {      	
+	      } else {
 		    	validateQuantity = false;
-	      }          
-	   	} // for       	
-	   	
+	      }
+	   	} // for
+
 
 			if(orderDate && clientName && clientContact && paid && discount && paymentType && paymentStatus) {
 				if(validateProduct == true && validateQuantity == true) {
@@ -131,55 +131,55 @@ $(document).ready(function() {
 					$.ajax({
 						url : form.attr('action'),
 						type: form.attr('method'),
-						data: form.serialize(),					
+						data: form.serialize(),
 						dataType: 'json',
 						success:function(response) {
 							console.log(response);
 							// reset button
 							$("#createOrderBtn").button('reset');
-							
+
 							$(".text-danger").remove();
 							$('.form-group').removeClass('has-error').removeClass('has-success');
 
 							if(response.success == true) {
-								
+
 								// create order button
 								$(".success-messages").html('<div class="alert alert-success">'+
 	            	'<button type="button" class="close" data-dismiss="alert">&times;</button>'+
 	            	'<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
 	            	' <br /> <br /> <a type="button" onclick="printOrder('+response.order_id+')" class="btn btn-primary"> <i class="glyphicon glyphicon-print"></i> Print </a>'+
 	            	'<a href="orders.php?o=add" class="btn btn-default" style="margin-left:10px;"> <i class="glyphicon glyphicon-plus-sign"></i> Add New Order </a>'+
-	            	
+
 	   		       '</div>');
-								
+
 							$("html, body, div.panel, div.pane-body").animate({scrollTop: '0px'}, 100);
 
 							// disabled te modal footer button
 							$(".submitButtonFooter").addClass('div-hide');
 							// remove the product row
 							$(".removeProductRowBtn").addClass('div-hide');
-								
+
 							} else {
-								alert(response.messages);								
+								alert(response.messages);
 							}
 						} // /response
 					}); // /ajax
 				} // if array validate is true
 			} // /if field validate is true
-			
+
 
 			return false;
-		}); // /create order form function	
-	
+		}); // /create order form function
+
 	} else if(divRequest == 'manord') {
-		// top nav child bar 
+		// top nav child bar
 		$('#topNavManageOrder').addClass('active');
 
 		manageOrderTable = $("#manageOrderTable").DataTable({
 			'ajax': 'php_action/fetchOrder.php',
 			'order': []
-		});		
-					
+		});
+
 	} else if(divRequest == 'editOrd') {
 		$("#orderDate").datepicker();
 
@@ -190,16 +190,16 @@ $(document).ready(function() {
 
 			$('.form-group').removeClass('has-error').removeClass('has-success');
 			$('.text-danger').remove();
-				
+
 			var orderDate = $("#orderDate").val();
 			var clientName = $("#clientName").val();
 			var clientContact = $("#clientContact").val();
 			var paid = $("#paid").val();
 			var discount = $("#discount").val();
 			var paymentType = $("#paymentType").val();
-			var paymentStatus = $("#paymentStatus").val();		
+			var paymentStatus = $("#paymentStatus").val();
 
-			// form validation 
+			// form validation
 			if(orderDate == "") {
 				$("#orderDate").after('<p class="text-danger"> The Order Date field is required </p>');
 				$('#orderDate').closest('.form-group').addClass('has-error');
@@ -251,46 +251,46 @@ $(document).ready(function() {
 
 
 			// array validation
-			var productName = document.getElementsByName('productName[]');				
+			var productName = document.getElementsByName('productName[]');
 			var validateProduct;
-			for (var x = 0; x < productName.length; x++) {       			
-				var productNameId = productName[x].id;	    	
-		    if(productName[x].value == ''){	    		    	
+			for (var x = 0; x < productName.length; x++) {
+				var productNameId = productName[x].id;
+		    if(productName[x].value == ''){
 		    	$("#"+productNameId+"").after('<p class="text-danger"> Product Name Field is required!! </p>');
-		    	$("#"+productNameId+"").closest('.form-group').addClass('has-error');	    		    	    	
-	      } else {      	
-		    	$("#"+productNameId+"").closest('.form-group').addClass('has-success');	    		    		    	
-	      }          
+		    	$("#"+productNameId+"").closest('.form-group').addClass('has-error');
+	      } else {
+		    	$("#"+productNameId+"").closest('.form-group').addClass('has-success');
+	      }
 	   	} // for
 
-	   	for (var x = 0; x < productName.length; x++) {       						
-		    if(productName[x].value){	    		    		    	
+	   	for (var x = 0; x < productName.length; x++) {
+		    if(productName[x].value){
 		    	validateProduct = true;
-	      } else {      	
+	      } else {
 		    	validateProduct = false;
-	      }          
-	   	} // for       		   	
-	   	
-	   	var quantity = document.getElementsByName('quantity[]');		   	
+	      }
+	   	} // for
+
+	   	var quantity = document.getElementsByName('quantity[]');
 	   	var validateQuantity;
-	   	for (var x = 0; x < quantity.length; x++) {       
+	   	for (var x = 0; x < quantity.length; x++) {
 	 			var quantityId = quantity[x].id;
-		    if(quantity[x].value == ''){	    	
+		    if(quantity[x].value == ''){
 		    	$("#"+quantityId+"").after('<p class="text-danger"> Product Name Field is required!! </p>');
-		    	$("#"+quantityId+"").closest('.form-group').addClass('has-error');	    		    		    	
-	      } else {      	
-		    	$("#"+quantityId+"").closest('.form-group').addClass('has-success');	    		    		    		    	
-	      } 
+		    	$("#"+quantityId+"").closest('.form-group').addClass('has-error');
+	      } else {
+		    	$("#"+quantityId+"").closest('.form-group').addClass('has-success');
+	      }
 	   	}  // for
 
-	   	for (var x = 0; x < quantity.length; x++) {       						
-		    if(quantity[x].value){	    		    		    	
+	   	for (var x = 0; x < quantity.length; x++) {
+		    if(quantity[x].value){
 		    	validateQuantity = true;
-	      } else {      	
+	      } else {
 		    	validateQuantity = false;
-	      }          
-	   	} // for       	
-	   	
+	      }
+	   	} // for
+
 
 			if(orderDate && clientName && clientContact && paid && discount && paymentType && paymentStatus) {
 				if(validateProduct == true && validateQuantity == true) {
@@ -300,60 +300,65 @@ $(document).ready(function() {
 					$.ajax({
 						url : form.attr('action'),
 						type: form.attr('method'),
-						data: form.serialize(),					
+						data: form.serialize(),
 						dataType: 'json',
 						success:function(response) {
 							console.log(response);
 							// reset button
 							$("#editOrderBtn").button('reset');
-							
+
 							$(".text-danger").remove();
 							$('.form-group').removeClass('has-error').removeClass('has-success');
 
 							if(response.success == true) {
-								
+
 								// create order button
 								$(".success-messages").html('<div class="alert alert-success">'+
 	            	'<button type="button" class="close" data-dismiss="alert">&times;</button>'+
-	            	'<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +	            		            		            	
+	            	'<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
 	   		       '</div>');
-								
+
 							$("html, body, div.panel, div.pane-body").animate({scrollTop: '0px'}, 100);
 
 							// disabled te modal footer button
 							$(".editButtonFooter").addClass('div-hide');
 							// remove the product row
 							$(".removeProductRowBtn").addClass('div-hide');
-								
+
 							} else {
-								alert(response.messages);								
+								alert(response.messages);
 							}
 						} // /response
 					}); // /ajax
 				} // if array validate is true
 			} // /if field validate is true
-			
+
 
 			return false;
-		}); // /edit order form function	
-	} 	
+		}); // /edit order form function
+	}
+
+	$("#saveOrderModalBtn").click(function(e) {
+		e.preventDefault();
+		addOrder();
+	});
 
 }); // /documernt
 
 
 // print order function
 function printOrder(orderId = null) {
-	if(orderId) {		
-			
+	if(orderId) {
+
 		$.ajax({
 			url: 'php_action/printOrder.php',
 			type: 'post',
 			data: {orderId: orderId},
 			dataType: 'text',
 			success:function(response) {
-				
+
 				var mywindow = window.open('', 'Stock Management System', 'height=400,width=600');
-        mywindow.document.write('<html><head><title>Order Invoice</title>');        
+        mywindow.document.write('<html><head><title>Order Invoice</title>');
         mywindow.document.write('</head><body>');
         mywindow.document.write(response);
         mywindow.document.write('</body></html>');
@@ -363,7 +368,7 @@ function printOrder(orderId = null) {
 
         mywindow.print();
         mywindow.close();
-				
+
 			}// /success function
 		}); // /ajax function to fetch the printable order
 	} // /if orderId
@@ -378,12 +383,12 @@ function addRow() {
 	var arrayNumber;
 	var count;
 
-	if(tableLength > 0) {		
+	if(tableLength > 0) {
 		tableRow = $("#productTable tbody tr:last").attr('id');
 		arrayNumber = $("#productTable tbody tr:last").attr('class');
-		count = tableRow.substring(3);	
+		count = tableRow.substring(3);
 		count = Number(count) + 1;
-		arrayNumber = Number(arrayNumber) + 1;					
+		arrayNumber = Number(arrayNumber) + 1;
 	} else {
 		// no table row
 		count = 1;
@@ -395,9 +400,9 @@ function addRow() {
 		type: 'post',
 		dataType: 'json',
 		success:function(response) {
-			$("#addRowBtn").button("reset");			
+			$("#addRowBtn").button("reset");
 
-			var tr = '<tr id="row'+count+'" class="'+arrayNumber+'">'+			  				
+			var tr = '<tr id="row'+count+'" class="'+arrayNumber+'">'+
 				'<td>'+
 					'<div class="form-group">'+
 
@@ -405,9 +410,9 @@ function addRow() {
 						'<option value="">~~SELECT~~</option>';
 						// console.log(response);
 						$.each(response, function(index, value) {
-							tr += '<option value="'+value[0]+'">'+value[1]+'</option>';							
+							tr += '<option value="'+value[0]+'">'+value[1]+'</option>';
 						});
-													
+
 					tr += '</select>'+
 					'</div>'+
 				'</td>'+
@@ -428,11 +433,11 @@ function addRow() {
 					'<button class="btn btn-default removeProductRowBtn" type="button" onclick="removeProductRow('+count+')"><i class="glyphicon glyphicon-trash"></i></button>'+
 				'</td>'+
 			'</tr>';
-			if(tableLength > 0) {							
+			if(tableLength > 0) {
 				$("#productTable tbody tr:last").after(tr);
-			} else {				
+			} else {
 				$("#productTable tbody").append(tr);
-			}		
+			}
 
 		} // /success
 	});	// get the product data
@@ -453,16 +458,16 @@ function removeProductRow(row = null) {
 // select on product data
 function getProductData(row = null) {
 	if(row) {
-		var productId = $("#productName"+row).val();		
-		
+		var productId = $("#productName"+row).val();
+
 		if(productId == "") {
 			$("#rate"+row).val("");
 
-			$("#quantity"+row).val("");						
+			$("#quantity"+row).val("");
 			$("#total"+row).val("");
 
 			// remove check if product name is selected
-			// var tableProductLength = $("#productTable tbody tr").length;			
+			// var tableProductLength = $("#productTable tbody tr").length;
 			// for(x = 0; x < tableProductLength; x++) {
 			// 	var tr = $("#productTable tbody tr")[x];
 			// 	var count = $(tr).attr('id');
@@ -470,10 +475,10 @@ function getProductData(row = null) {
 
 			// 	var productValue = $("#productName"+row).val()
 
-			// 	if($("#productName"+count).val() == "") {					
-			// 		$("#productName"+count).find("#changeProduct"+productId).removeClass('div-hide');	
+			// 	if($("#productName"+count).val() == "") {
+			// 		$("#productName"+count).find("#changeProduct"+productId).removeClass('div-hide');
 			// 		console.log("#changeProduct"+count);
-			// 	}											
+			// 	}
 			// } // /for
 
 		} else {
@@ -484,7 +489,7 @@ function getProductData(row = null) {
 				dataType: 'json',
 				success:function(response) {
 					// setting the rate value into the rate input field
-					
+
 					$("#rate"+row).val(response.rate);
 					$("#rateValue"+row).val(response.rate);
 
@@ -494,9 +499,9 @@ function getProductData(row = null) {
 					total = total.toFixed(2);
 					$("#total"+row).val(total);
 					$("#totalValue"+row).val(total);
-					
+
 					// check if product name is selected
-					// var tableProductLength = $("#productTable tbody tr").length;					
+					// var tableProductLength = $("#productTable tbody tr").length;
 					// for(x = 0; x < tableProductLength; x++) {
 					// 	var tr = $("#productTable tbody tr")[x];
 					// 	var count = $(tr).attr('id');
@@ -505,17 +510,17 @@ function getProductData(row = null) {
 					// 	var productValue = $("#productName"+row).val()
 
 					// 	if($("#productName"+count).val() != productValue) {
-					// 		// $("#productName"+count+" #changeProduct"+count).addClass('div-hide');	
-					// 		$("#productName"+count).find("#changeProduct"+productId).addClass('div-hide');								
+					// 		// $("#productName"+count+" #changeProduct"+count).addClass('div-hide');
+					// 		$("#productName"+count).find("#changeProduct"+productId).addClass('div-hide');
 					// 		console.log("#changeProduct"+count);
-					// 	}											
+					// 	}
 					// } // /for
-			
+
 					subAmount();
 				} // /success
-			}); // /ajax function to fetch the product data	
+			}); // /ajax function to fetch the product data
 		}
-				
+
 	} else {
 		alert('no row! please refresh the page');
 	}
@@ -528,7 +533,7 @@ function getTotal(row = null) {
 		total = total.toFixed(2);
 		$("#total"+row).val(total);
 		$("#totalValue"+row).val(total);
-		
+
 		subAmount();
 
 	} else {
@@ -574,7 +579,7 @@ function subAmount() {
 	} else {
 		$("#grandTotal").val(totalAmount);
 		$("#grandTotalValue").val(totalAmount);
-	} // /else discount	
+	} // /else discount
 
 	var paidAmount = $("#paid").val();
 	if(paidAmount) {
@@ -582,7 +587,7 @@ function subAmount() {
 		paidAmount = paidAmount.toFixed(2);
 		$("#due").val(paidAmount);
 		$("#dueValue").val(paidAmount);
-	} else {	
+	} else {
 		$("#due").val($("#grandTotal").val());
 		$("#dueValue").val($("#grandTotal").val());
 	} // else
@@ -595,7 +600,7 @@ function discountFunc() {
  	totalAmount = totalAmount.toFixed(2);
 
  	var grandTotal;
- 	if(totalAmount) { 	
+ 	if(totalAmount) {
  		grandTotal = Number($("#totalAmount").val()) - Number($("#discount").val());
  		grandTotal = grandTotal.toFixed(2);
 
@@ -606,7 +611,7 @@ function discountFunc() {
 
  	var paid = $("#paid").val();
 
- 	var dueAmount; 	
+ 	var dueAmount;
  	if(paid) {
  		dueAmount = Number($("#grandTotal").val()) - Number($("#paid").val());
  		dueAmount = dueAmount.toFixed(2);
@@ -637,7 +642,7 @@ function resetOrderForm() {
 	$("#createOrderForm")[0].reset();
 	// remove remove text danger
 	$(".text-danger").remove();
-	// remove form group error 
+	// remove form group error
 	$(".form-group").removeClass('has-success').removeClass('has-error');
 } // /reset order form
 
@@ -672,7 +677,7 @@ function removeOrder(orderId = null) {
 							$(this).delay(3000).hide(10, function() {
 								$(this).remove();
 							});
-						}); // /.alert	          
+						}); // /.alert
 
 					} else {
 						// error messages
@@ -686,14 +691,14 @@ function removeOrder(orderId = null) {
 							$(this).delay(3000).hide(10, function() {
 								$(this).remove();
 							});
-						}); // /.alert	          
+						}); // /.alert
 					} // /else
 
 				} // /success
 			});  // /ajax function to remove the order
 
 		}); // /remove order button clicked
-		
+
 
 	} else {
 		alert('error! refresh the page again');
@@ -712,16 +717,16 @@ function paymentOrder(orderId = null) {
 			type: 'post',
 			data: {orderId: orderId},
 			dataType: 'json',
-			success:function(response) {				
+			success:function(response) {
 
-				// due 
-				$("#due").val(response.order[10]);				
+				// due
+				$("#due").val(response.order[10]);
 
-				// pay amount 
+				// pay amount
 				$("#payAmount").val(response.order[10]);
 
-				var paidAmount = response.order[9] 
-				var dueAmount = response.order[10];							
+				var paidAmount = response.order[9]
+				var dueAmount = response.order[10];
 				var grandTotal = response.order[8];
 
 				// update payment
@@ -784,7 +789,7 @@ function paymentOrder(orderId = null) {
 									$(this).delay(3000).hide(10, function() {
 										$(this).remove();
 									});
-								}); // /.alert	
+								}); // /.alert
 
 			          // refresh the manage order table
 								manageOrderTable.ajax.reload(null, false);
@@ -793,13 +798,56 @@ function paymentOrder(orderId = null) {
 
 						});
 					} // /if
-						
+
 					return false;
-				}); // /update payment			
+				}); // /update payment
 
 			} // /success
 		}); // fetch order data
 	} else {
 		alert('Error ! Refresh the page again');
 	}
+}
+
+function addOrder() {
+	$.ajax({
+		url: 'php_action/editOrderDelivery.php',
+		type: 'post',
+		data: {orderId: orderId},
+		dataType: 'json',
+		success:function(response) {
+			$("#addOrderModal").modal('hide');
+
+			//update OrderDeliveryTable
+			$("#OrderDeliveryTable thead").empty();
+			$("#OrderDeliveryTable tbody").empty();
+
+			var th = response.headers.map(function(header) {
+				return "<th>" + header + "</th>";
+			}).join('');
+
+			var tBodyData = response.orders.map(function(order) {
+				var tds = order.map(function(item) {
+					return "<td>" + item + "</td>";
+				}).join('');
+
+				return "<tr>" + tds + "</tr>";
+			}).join('');
+
+			$("#OrderDeliveryTable thead").append(th);
+			$("#OrderDeliveryTable tbody").append(tBodyData);
+
+			$("#success-messages").html('<div class="alert alert-success">'+
+        '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+        '<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
+      '</div>');
+
+			// remove the mesages
+      $(".alert-success").delay(500).show(10, function() {
+				$(this).delay(3000).hide(10, function() {
+					$(this).remove();
+				});
+			}); // /.alert
+		}
+	});
 }

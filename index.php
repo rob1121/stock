@@ -1,15 +1,15 @@
-<?php 
+<?php
 require_once 'php_action/db_connect.php';
 
 session_start();
 
 if(isset($_SESSION['userId'])) {
-	header('location: http://localhost:9080/stock/dashboard.php');	
+	header('location: http://localhost:9080/stock/dashboard.php');
 }
 
 $errors = array();
 
-if($_POST) {		
+if($_POST) {
 
 	$username = $_POST['username'];
 	$password = $_POST['password'];
@@ -17,7 +17,7 @@ if($_POST) {
 	if(empty($username) || empty($password)) {
 		if($username == "") {
 			$errors[] = "Username is required";
-		} 
+		}
 
 		if($password == "") {
 			$errors[] = "Password is required";
@@ -39,16 +39,16 @@ if($_POST) {
 				// set session
 				$_SESSION['userId'] = $user_id;
 
-				header('location: http://localhost:9080/stock/dashboard.php');	
+				header('location: http://localhost:9080/stock/dashboard.php');
 			} else{
-				
+
 				$errors[] = "Incorrect username/password combination";
 			} // /else
-		} else {		
-			$errors[] = "Username doesnot exists";		
+		} else {
+			$errors[] = "Username doesnot exists";
 		} // /else
 	} // /else not empty username // password
-	
+
 } // /if $_POST
 ?>
 
@@ -65,11 +65,11 @@ if($_POST) {
 	<link rel="stylesheet" href="assests/font-awesome/css/font-awesome.min.css">
 
   <!-- custom css -->
-  <link rel="stylesheet" href="custom/css/custom.css">	
+  <link rel="stylesheet" href="custom/css/custom.css">
 
   <!-- jquery -->
 	<script src="assests/jquery/jquery.min.js"></script>
-  <!-- jquery ui -->  
+  <!-- jquery ui -->
   <link rel="stylesheet" href="assests/jquery-ui/jquery-ui.min.css">
   <script src="assests/jquery-ui/jquery-ui.min.js"></script>
 
@@ -91,7 +91,7 @@ if($_POST) {
 								foreach ($errors as $key => $value) {
 									echo '<div class="alert alert-warning" role="alert">
 									<i class="glyphicon glyphicon-exclamation-sign"></i>
-									'.$value.'</div>';										
+									'.$value.'</div>';
 									}
 								} ?>
 						</div>
@@ -109,7 +109,7 @@ if($_POST) {
 									<div class="col-sm-10">
 									  <input type="password" class="form-control" id="password" name="password" placeholder="Password" autocomplete="off" />
 									</div>
-								</div>								
+								</div>
 								<div class="form-group">
 									<div class="col-sm-offset-2 col-sm-10">
 									  <button type="submit" class="btn btn-default"> <i class="glyphicon glyphicon-log-in"></i> Sign in</button>
@@ -126,7 +126,7 @@ if($_POST) {
 		</div>
 		<!-- /row -->
 	</div>
-	<!-- container -->	
+	<!-- container -->
 </body>
 </html>
 
@@ -136,4 +136,3 @@ if($_POST) {
 
 
 
-	
