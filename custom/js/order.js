@@ -1,7 +1,11 @@
 var manageOrderTable;
+var OrderDeliveryTable;
 var productIdForDelivery;
+ var po = null; //purchase order
 
 $(document).ready(function() {
+	$("#divTable").hide();
+
   $("#orderDeliveryDate").datepicker();
   $("#orderQuantity").on('keydown', function(e){-1!==$.inArray(e.keyCode,[46,8,9,27,13,110,190])||/65|67|86|88/.test(e.keyCode)&&(!0===e.ctrlKey||!0===e.metaKey)||35<=e.keyCode&&40>=e.keyCode||(e.shiftKey||48>e.keyCode||57<e.keyCode)&&(96>e.keyCode||105<e.keyCode)&&e.preventDefault()});
 
@@ -28,6 +32,7 @@ $(document).ready(function() {
 			var orderDate = $("#orderDate").val();
 			var clientName = $("#clientName").val();
 			var clientContact = $("#clientContact").val();
+			var clientPO = $("#clientPO").val();
 			var paid = $("#paid").val();
 			var discount = $("#discount").val();
 			var paymentType = $("#paymentType").val();
@@ -53,6 +58,13 @@ $(document).ready(function() {
 				$('#clientContact').closest('.form-group').addClass('has-error');
 			} else {
 				$('#clientContact').closest('.form-group').addClass('has-success');
+			} // /else
+
+			if(clientPO == "") {
+				$("#clientPO").after('<p class="text-danger"> The OP number field is required </p>');
+				$('#clientPO').closest('.form-group').addClass('has-error');
+			} else {
+				$('#clientPO').closest('.form-group').addClass('has-success');
 			} // /else
 
 			if(paid == "") {
@@ -173,11 +185,9 @@ $(document).ready(function() {
 
 			return false;
 		}); // /create order form function
-
 	} else if(divRequest == 'manord') {
 		// top nav child bar
 		$('#topNavManageOrder').addClass('active');
-
 		manageOrderTable = $("#manageOrderTable").DataTable({
 			'ajax': 'php_action/fetchOrder.php',
 			'order': []
@@ -197,6 +207,7 @@ $(document).ready(function() {
 			var orderDate = $("#orderDate").val();
 			var clientName = $("#clientName").val();
 			var clientContact = $("#clientContact").val();
+			var clientPO = $("#clientPO").val();
 			var paid = $("#paid").val();
 			var discount = $("#discount").val();
 			var paymentType = $("#paymentType").val();
@@ -222,6 +233,13 @@ $(document).ready(function() {
 				$('#clientContact').closest('.form-group').addClass('has-error');
 			} else {
 				$('#clientContact').closest('.form-group').addClass('has-success');
+			} // /else
+
+			if(clientPO == "") {
+				$("#clientPO").after('<p class="text-danger"> The OP number field is required </p>');
+				$('#clientPO').closest('.form-group').addClass('has-error');
+			} else {
+				$('#clientPO').closest('.form-group').addClass('has-success');
 			} // /else
 
 			if(paid == "") {
@@ -343,6 +361,35 @@ $(document).ready(function() {
 
 	$("#OrderDeliveryTable").on('click', '.editBtn', function() {
     productIdForDelivery = $(this).data("productid");
+  });
+
+	$("#manageOrderTable").on('click', '.poNumberBtn', function() {
+		po = $(this).data('po');
+
+    $.ajax({
+      url: 'php_action/fetchOrderForDelivery.php',
+      type: 'post',
+      data: {po: po},
+      dataType: 'json',
+      success: function(response) {
+      	var th = response.headers.map(function(header) {
+					return "<th>" + header + "</th>"
+      	});
+
+      	var tbody = response.data.map(function(data) {
+      		var td = data.map(function(item) {
+      			return "<td>" + item + "</td>";
+      		});
+
+      		return "<tr>" + td + "</tr>";
+      	});
+
+      	$("#OrderDeliveryTable thead tr").empty().append(th);
+      	$("#OrderDeliveryTable tbody").empty().append(tbody);
+      	$("#divTable").show();
+      }
+    });
+
   });
 
 	$("#saveOrderModalBtn").click(function(e) {

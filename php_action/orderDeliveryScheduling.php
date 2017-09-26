@@ -6,153 +6,241 @@
  */
 
 
-/**
- * @param $historyHeaders
- * @param $item
- * @return mixed
- */
-function getPending($historyHeaders, $item) {
-    $pending = $item->quantity;
-    foreach($historyHeaders as $date) {
-      $key = dateKey($date['modified']);
-      $pending -= $item->$key === '-' ? 0 : $item->$key;
-    }
 
-    return $pending;
-}
-/**
- * @param $date
- * @return array
- */
-function monthDate($date) {
-  $newDate = explode('-', $date);
-
-  return [
-    "modified" => "{$newDate[1]}/{$newDate[2]}",
-    "orig" => $date,
-  ];
-}
-
-/**
- * @param $date
- * @return mixed
- */
-function dateKey($date) {
-  return str_replace("/","_", $date);
-}
-
-
-/**
- * @param $db
- * @param $product_id
- * @return array
- */
-function getOrderItem($db, $product_id) {
-  $sql = "SELECT * FROM order_item where product_id = {$product_id}";
-  $order_item = $db->query($sql);
-  $orderItem = [];
-  while ($orderItem[] = $order_item->fetch_assoc());
-
-  return $orderItem;
-}
-
-/**
- * @param $orderItem
- * @return float|int
- */
-function getTotal($orderItem) {
-  $total = array_column((array)$orderItem, 'total');
-  return array_sum($total);
-}
-
-/**
- * @param $db
- * @param $columns
- * @return array
- */
-function getOrderHistory($db, $columns) {
-  $product_ids = implode(', ', $columns);
-  $sql = "SELECT * FROM order_item JOIN orders USING(order_id) where product_id IN ({$product_ids})";
-  $orders = $db->query($sql);
-  $orderItems = [];
-  while ($orderItems[] = $orders->fetch_assoc());
-
-  array_filter($orderItems);
-//  $orderItems = array_map(function($order) {
-//    $order['quantity'] =
-//    return $order;
-//  }, $orderItems);
-  $orderItems = array_filter($orderItems, function($order) {
-    return $order['order_status'] !== 2;
-  });
-
-  return $orderItems;
-}
-
-function sumOFOrderToDeliver($item, $dates) {
-  $total = 0;
-  foreach($dates as $date) {
-    $delivery = dateKey($date['modified']);
-    $total += (int)$item->$delivery;
+class OrderDelivery {
+private $connect;
+  public function __construct($connect) {
+    $this->connect = $connect;
   }
 
-  return $total;
-}
+  /**
+   * @param $date
+   * @return array
+   */
+  function monthDate($date) {
+    $newDate = explode('-', $date);
 
-/**
- * @param $orderItems
- * @return array
- */
-function historyAsHeader($orderItems) {
-  $headers = array_unique(array_column($orderItems, 'order_date'));
-  sort($headers);
-  return array_map("monthDate", $headers);
-}
+    return [
+      "modified" => "{$newDate[1]}/{$newDate[2]}",
+      "orig" => $date,
+    ];
+  }
 
-/**
- * @param $products
- * @param $orderItems
- * @param $headers
- * @return array
- */
-function addQuantityPerDate($products, $orderItems, $headers) {
-  $products = array_map(function($item) use($orderItems, $headers) {
-    $item = (array)$item;
-    foreach($headers as $date) {
-      $val = array_filter($orderItems, function($dv) use($item, $date) {
-        return $dv['product_id'] === $item['product_id'] && $dv['order_date'] === $date['orig'];
+  /**
+   * @param $date
+   * @return mixed
+   */
+  static function dateKey($date) {
+    return str_replace("/","_", $date);
+  }
+
+
+  /**
+   * @param $this->connect
+   * @param $product_id
+   * @return array
+   */
+  function getOrderItem($product_id) {
+    $sql = "SELECT * FROM order_item where product_id = {$product_id}";
+    $order_item = $this->connect->query($sql);
+    $orderItem = [];
+    while ($orderItem[] = $order_item->fetch_assoc());
+
+    return $orderItem;
+  }
+
+  /**
+   * @param $orderItem
+   * @return float|int
+   */
+  function getTotal($orderItem) {
+    $total = array_column((array)$orderItem, 'total');
+    return array_sum($total);
+  }
+
+  /**
+   * @param $this->connect
+   * @param $columns
+   * @return array
+   */
+  function getOrderHistory($productIds) {
+      $orderItems = [];
+
+    if ($productIds) {
+      $oprtr = count($productIds) > 1 ? 'IN' : '=';
+      $match = count($productIds) > 1 ? ("(" . implode(', ', $productIds) . ")") : $productIds[0];
+
+      $sql = "SELECT * FROM order_item JOIN orders USING(order_id) where product_id $oprtr $match";
+      $orders = $this->connect->query($sql);
+
+      if ($orders !== false)
+        while ($orderItems[] = $orders->fetch_assoc());
+
+      $orderItems = array_filter($orderItems);
+
+      $orderItems = array_filter($orderItems, function($order) {
+        return $order['order_status'] !== 2;
       });
-      $item[dateKey($date['modified'])] = count($val) ? array_sum(array_column($val, 'quantity')) : "-";
     }
-    $item = (object)$item;
 
-    return $item;
-  }, $products);
-
-  return $products;
-}
-
-function getProducts($db) {
-  $sql = "SELECT * FROM product";
-  $query = $db->query($sql);
-  $data = [];
-  $index = 0;
-  while ($item = $query->fetch_assoc()) {
-    $data[] = $item;
-    $orderItem = getOrderItem($db, $item['product_id']);
-    $data[$index]['amount'] = getTotal($orderItem);
-    $data[$index] = (object)$data[$index];
-    $index += 1;
+    return $orderItems;
   }
-  return $data;
-}
 
-function clients($db) {
-  $sql = "SELECT * FROM clients";
-  $query = $db->query($sql);
-  $data = [];
-  while($data[]= $query->fetch_object());
+  function sumOFOrderToDeliver($item, $dates) {
+    $total = 0;
+    foreach($dates as $date) {
+      $delivery = dateKey($date['modified']);
+      $total += (int)$item->delivery;
+    }
 
-  return array_filter($data);
+    return $total;
+  }
+
+  /**
+   * @param $orderItems
+   * @return array
+   */
+  function historyAsHeader($orderItems) {
+    $headers = array_unique(array_column($orderItems, 'order_date'));
+    sort($headers);
+    return array_map(function($header) {
+      return $this->monthDate($header);
+    }, $headers);
+  }
+
+  /**
+   * @param $products
+   * @param $orderItems
+   * @param $headers
+   * @return array
+   */
+  function addQuantityPerDate($product, $headers) {
+    $product['orders'] = array_map(function($item) use(&$product, $headers) {
+      $item = (array)$item;
+      $product['orderItems'] = array_map(function($orderItem) use($headers) {
+
+        foreach($headers as $date) {
+          $orderItem[$this->dateKey($date['modified'])] = count($orderItem) ? $orderItem['quantity'] : "-";
+        }
+
+        return $orderItem;
+      }, $product['orderItems']);
+      $item = (object)$item;
+
+      return $item;
+    }, $product['orders']);
+
+    return $product;
+  }
+
+  function getProducts($productIds) {
+      $data = [];
+
+    if ($productIds) {
+      $oprtr = count($productIds) > 1 ? 'IN' : '=';
+      $match = count($productIds) > 1 ? ("(" . implode(', ', $productIds) . ")") : $productIds[0];
+      $sql = "SELECT * FROM product WHERE product_id $oprtr $match";
+      $query = $this->connect->query($sql);
+      $index = 0;
+      while ($item = $query->fetch_assoc()) {
+        $data[] = $item;
+        $orderItem = getOrderItem($item['product_id']);
+        $data[$index]['amount'] = getTotal($orderItem);
+        $data[$index] = (object)$data[$index];
+        $index += 1;
+      }
+    }
+    return $data;
+  }
+
+  function clients() {
+    $sql = "SELECT * FROM clients";
+    $query = $this->connect->query($sql);
+    $data = [];
+    while($data[]= $query->fetch_object());
+
+    return array_filter($data);
+  }
+
+  function getRequiredproductPo($po) {
+    $orders = $this->getOrdersByPo($po);
+    $orderItems = $this->getORderItemByOrderIds(array_column($orders, 'order_id'));
+    $products = $this->getProductById(array_column($orderItems, 'product_id'));
+
+    return [
+      "orders" => $orders,
+      "orderItems" => $orderItems,
+      "products" => $products,
+    ];
+  }
+
+  function getProductById($productIds) {
+    $productRow = [];
+
+    if ($productIds) {
+      $oprtr = count($productIds) > 1 ? 'IN' : '=';
+      $match = count($productIds) > 1 ? ("(" . implode(', ', $productIds) . ")") : $productIds[0];
+      $productSql = "SELECT product_id, product_name, rate FROM product WHERE product_id $oprtr $match";
+      $productResult = $this->connect->query($productSql);
+
+      if($productResult !== false) {
+        $x = 0;
+        while($data = $productResult->fetch_assoc()) {
+          $productRow[$x]['product_id'] = $data['product_id'];
+          $productRow[$x]['product_name'] = $data['product_name'];
+          $productRow[$x]['rate'] = $data['rate'];
+          $x++;
+        }
+      }
+    }
+    return array_filter($productRow);
+  }
+
+  function getOrdersByPo($po) {
+    $row = [];
+    if ($po)  {
+      $sql = "SELECT order_id, order_date, client_name, client_contact, payment_status, po_number FROM orders WHERE order_status = 1 AND po_number = '" . trim($po) . "'";
+      $result = $this->connect->query($sql);
+      if($result !== false) {
+        $x = 0;
+        while($data = $result->fetch_assoc()) {
+          $row[$x]['order_id'] = (int)$data['order_id'];
+          $row[$x]['order_date'] = $data['order_date'];
+          $row[$x]['client_name'] = $data['client_name'];
+          $row[$x]['client_contact'] = $data['client_contact'];
+          $row[$x]['payment_status'] = (int)$data['payment_status'];
+          $row[$x]['po_number'] = $data['po_number'];
+          $x++;
+        }
+      }
+    }
+
+    return array_filter($row);
+  }
+
+  function getORderItemByOrderIds($orderIds) {
+    $orderItemRow = [];
+
+    if ($orderIds) {
+      $oprtr = count($orderIds) > 1 ? 'IN' : '=';
+      $match = count($orderIds) > 1 ? ("(" . implode(', ', $orderIds) . ")") : $orderIds[0];
+      $orderItemSql = "SELECT order_id, product_id, quantity, rate, total, order_item_status FROM order_item WHERE order_id $oprtr $match";
+      $orderItemResult = $this->connect->query($orderItemSql);
+
+      if($orderItemResult !== false) {
+        $x = 0;
+        while($data = $orderItemResult->fetch_assoc()) {
+          $orderItemRow[$x]['order_id'] = (int)$data['order_id'];
+          $orderItemRow[$x]['product_id'] = (int)$data['product_id'];
+          $orderItemRow[$x]['quantity'] = (int)$data['quantity'];
+          $orderItemRow[$x]['rate'] = (int)$data['rate'];
+          $orderItemRow[$x]['total'] = (int)$data['total'];
+          $orderItemRow[$x]['order_item_status'] = (int)$data['order_item_status'];
+          $x++;
+       }
+      }
+    }
+    return array_filter($orderItemRow);
+  }
 }
 ?>

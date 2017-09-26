@@ -49,6 +49,10 @@ if($_POST) {
   if($connect->query($sql) === TRUE) {
     $sql = "INSERT INTO order_item (order_id, product_id, quantity, rate, total, order_item_status) VALUES($connect->insert_id,$productId,$orderQuantity,$product->rate,$subTotal,2)";
     $connect->query($sql);
+
+    $sql = "UPDATE INTO order_item (order_id, product_id, quantity, rate, total, order_item_status) VALUES($connect->insert_id,$productId,$orderQuantity,$product->rate,$subTotal,2)";
+
+    $connect->query($sql);
     $valid['success'] = true;
     $valid['messages'] = "orders complete";
   }

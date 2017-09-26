@@ -1,17 +1,17 @@
-<?php 	
+<?php
 
 require_once 'core.php';
 
-$sql = "SELECT order_id, order_date, client_name, client_contact, payment_status FROM orders WHERE order_status = 1";
+$sql = "SELECT order_id, order_date, client_name, client_contact, payment_status, po_number FROM orders WHERE order_status = 1";
 $result = $connect->query($sql);
 
 
 
 $output = array('data' => array());
 
-if($result->num_rows > 0) { 
- 
- $paymentStatus = ""; 
+if($result->num_rows > 0) {
+
+ $paymentStatus = "";
  $x = 1;
 
  while($row = $result->fetch_array()) {
@@ -22,12 +22,12 @@ if($result->num_rows > 0) {
  	$itemCountRow = $itemCountResult->fetch_row();
 
 
- 	// active 
- 	if($row[4] == 1) { 		
+ 	// active
+ 	if($row[4] == 1) {
  		$paymentStatus = "<label class='label label-success'>Full Payment</label>";
- 	} else if($row[4] == 2) { 		
+ 	} else if($row[4] == 2) {
  		$paymentStatus = "<label class='label label-info'>Advance Payment</label>";
- 	} else { 		
+ 	} else {
  		$paymentStatus = "<label class='label label-warning'>No Payment</label>";
  	} // /else
 
@@ -38,31 +38,34 @@ if($result->num_rows > 0) {
 	  </button>
 	  <ul class="dropdown-menu">
 	    <li><a href="orders.php?o=editOrd&i='.$orderId.'" id="editOrderModalBtn"> <i class="glyphicon glyphicon-edit"></i> Edit</a></li>
-	    
+
 	    <li><a type="button" data-toggle="modal" id="paymentOrderModalBtn" data-target="#paymentOrderModal" onclick="paymentOrder('.$orderId.')"> <i class="glyphicon glyphicon-save"></i> Payment</a></li>
 
 	    <li><a type="button" onclick="printOrder('.$orderId.')"> <i class="glyphicon glyphicon-print"></i> Print </a></li>
-	    
-	    <li><a type="button" data-toggle="modal" data-target="#removeOrderModal" id="removeOrderModalBtn" onclick="removeOrder('.$orderId.')"> <i class="glyphicon glyphicon-trash"></i> Remove</a></li>       
-	  </ul>
-	</div>';		
 
- 	$output['data'][] = array( 		
+	    <li><a type="button" data-toggle="modal" data-target="#removeOrderModal" id="removeOrderModalBtn" onclick="removeOrder('.$orderId.')"> <i class="glyphicon glyphicon-trash"></i> Remove</a></li>
+	  </ul>
+	</div>';
+
+	$link = '<a href="#" data-po="' . $row[5] . '" class="poNumberBtn">' . $row[5] . '</a>';
+
+ 	$output['data'][] = array(
  		// image
  		$x,
  		// order date
  		$row[1],
  		// client name
- 		$row[2], 
+ 		$row[2],
  		// client contact
- 		$row[3], 		 	
- 		$itemCountRow, 		 	
+ 		$row[3],
+ 		$itemCountRow,
+ 		$link,
  		$paymentStatus,
  		// button
- 		$button 		
- 		); 	
+ 		$button
+ 		);
  	$x++;
- } // /while 
+ } // /while
 
 }// if num_rows
 

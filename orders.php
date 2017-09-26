@@ -12,13 +12,7 @@ if($_GET['o'] == 'add') {
   echo "<div class='div-request div-hide'>editOrd</div>";
 } // /else manage order
 
-
-$products = getProducts($connect);
-$columns = array_column($products, 'product_id');
-$orderItems = getOrderHistory($connect, $columns);
-$historyHeaders = historyAsHeader($orderItems);
-
-$products = addQuantityPerDate($products, $orderItems, $historyHeaders);
+$OrderDelivery = new OrderDelivery($connect);
 ?>
 
 <ol class="breadcrumb">
@@ -69,32 +63,31 @@ $products = addQuantityPerDate($products, $orderItems, $historyHeaders);
           <div class="success-messages"></div> <!--/success-messages-->
 
           <form class="form-horizontal" method="POST" action="php_action/createOrder.php" id="createOrderForm">
-
-
-              <!-- /form-group-->
-              <div class="form-group">
-                  <label for="clientName" class="col-sm-2 control-label">Client Name: </label>
-                  <div class="col-sm-10">
-                      <select class="form-control" name="clientName" id="clientNameDropdown">
-                          <option value="" disabled selected>~~SELECT~~</option>
-                        <?php foreach(clients($connect) as $client): ?>
-                            <option value="<?=$client->client_id?>"><?=$client->name?></option>
-                        <?php endforeach ?>
-                      </select>
-                  </div>
-              </div> <!-- /form-group-->
               <div class="form-group">
                   <label for="orderDate" class="col-sm-2 control-label">Order Date</label>
                   <div class="col-sm-10">
                       <input type="text" class="form-control" id="orderDate" name="orderDate" autocomplete="off" />
                   </div>
               </div> <!--/form-group-->
+              <!-- /form-group-->
               <div class="form-group">
-                  <label for="clientContact" class="col-sm-2 control-label">Client Contact</label>
+                  <label for="clientName" class="col-sm-2 control-label">Client Name: </label>
                   <div class="col-sm-10">
-                      <input type="text" class="form-control" id="clientContact" name="clientContact" placeholder="Contact Number" autocomplete="off" />
+                      <select class="form-control" name="clientName" id="clientNameDropdown">
+                          <option value="" disabled selected>~~SELECT~~</option>
+                        <?php foreach($OrderDelivery->clients($connect) as $client): ?>
+                            <option value="<?= $client->client_id ?>"><?= $client->name ?></option>
+                        <?php endforeach ?>
+                      </select>
                   </div>
-              </div> <!--/form-group-->
+              </div> <!-- /form-group-->
+                <input type="hidden" class="form-control" id="clientContact" name="clientContact" placeholder="Contact Number" autocomplete="off" />
+              <div class="form-group">
+                  <label for="clientContact" class="col-sm-2 control-label">OP Number</label>
+                  <div class="col-sm-10">
+                      <input type="text" class="form-control" id="clientPO" name="clientPO" placeholder="OP Number" autocomplete="off" />
+                  </div>
+              </div> <!--/form-group -->
 
               <table class="table" id="productTable">
                   <thead>
@@ -244,7 +237,6 @@ $products = addQuantityPerDate($products, $orderItems, $historyHeaders);
         ?>
 
           <div id="success-messages"></div>
-
           <table class="table" id="manageOrderTable">
               <thead>
               <tr>
@@ -253,6 +245,7 @@ $products = addQuantityPerDate($products, $orderItems, $historyHeaders);
                   <th>Client Name</th>
                   <th>Contact</th>
                   <th>Total Order Item</th>
+                  <th>PO #</th>
                   <th>Payment Status</th>
                   <th>Option</th>
               </tr>
@@ -561,38 +554,16 @@ $products = addQuantityPerDate($products, $orderItems, $historyHeaders);
 </div><!-- /.modal -->
 <!-- /remove order-->
 
-<table class="table" id="OrderDeliveryTable">
-    <thead>
-    <tr>
-        <th>#</th>
-        <th>Qty</th>
-        <th>Item Description</th>
-        <th>Unit price</th>
-        <th>amount</th>
-      <?php foreach($historyHeaders as $key => $item): ?>
-          <th><?= $item['modified'] ?></th>
-      <?php endforeach ?>
-        <th>pending</th>
-    </tr>
-    </thead>
-    <tbody>
-    <?php foreach($products as $key => $item): ?>
-        <tr>
-            <td><?= $key + 1 ?></td>
-            <td><?= sumOFOrderToDeliver($item, $historyHeaders)?></td>
-            <td><?= $item->product_name ?></td>
-            <td><?= $item->rate ?></td>
-            <td><?= $item->amount ?></td>
-          <?php foreach($historyHeaders as $date): $delivery = dateKey($date['modified']);?>
-              <td><?= $item->$delivery ?></td>
-          <?php endforeach ?>
-            <td><?= getPending($historyHeaders, $item) ?></td>
-            <td>
-                <button class="btn btn-default button1 editBtn" data-productid="<?= $item->product_id?>" data-toggle="modal" id="addOrderModalBtn" data-target="#addOrderModal"> <i class="glyphicon glyphicon-edit"></i> Edit </button></td>
-        </tr>
-    <?php endforeach ?>
-    </tbody>
-</table>
+<div id='divTable'>
+  <table class="table" id="OrderDeliveryTable">
+      <thead>
+      <tr>
+      </tr>
+      </thead>
+      <tbody>
+      </tbody>
+  </table>
+</div>
 
 
 
@@ -616,7 +587,7 @@ $products = addQuantityPerDate($products, $orderItems, $historyHeaders);
                         <label class="col-sm-1 control-label">: </label>
                         <div class="col-sm-7">
                             <select class="form-control" name="clientId" id="clientId">
-                              <?php foreach(clients($connect) as $client): ?>
+                              <?php foreach($OrderDelivery->clients($connect) as $client): ?>
                                   <option value="<?=$client->client_id?>"><?=$client->name?></option>
                               <?php endforeach ?>
                             </select>
