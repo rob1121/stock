@@ -63,6 +63,7 @@ $OrderDelivery = new OrderDelivery($connect);
           <div class="success-messages"></div> <!--/success-messages-->
 
           <form class="form-horizontal" method="POST" action="php_action/createOrder.php" id="createOrderForm">
+              <input type="hidden" id="clientContact" name="clientContact" />
               <div class="form-group">
                   <label for="orderDate" class="col-sm-2 control-label">Order Date</label>
                   <div class="col-sm-10">
@@ -73,7 +74,7 @@ $OrderDelivery = new OrderDelivery($connect);
               <div class="form-group">
                   <label for="clientName" class="col-sm-2 control-label">Client Name: </label>
                   <div class="col-sm-10">
-                      <select class="form-control" name="clientName" id="clientNameDropdown">
+                      <select class="form-control" name="clientName" id="clientName">
                           <option value="" disabled selected>~~SELECT~~</option>
                         <?php foreach($OrderDelivery->clients($connect) as $client): ?>
                             <option value="<?= $client->client_id ?>"><?= $client->name ?></option>
@@ -81,9 +82,8 @@ $OrderDelivery = new OrderDelivery($connect);
                       </select>
                   </div>
               </div> <!-- /form-group-->
-                <input type="hidden" class="form-control" id="clientContact" name="clientContact" placeholder="Contact Number" autocomplete="off" />
               <div class="form-group">
-                  <label for="clientContact" class="col-sm-2 control-label">OP Number</label>
+                  <label for="clientPO" class="col-sm-2 control-label">OP Number</label>
                   <div class="col-sm-10">
                       <input type="text" class="form-control" id="clientPO" name="clientPO" placeholder="OP Number" autocomplete="off" />
                   </div>
@@ -580,20 +580,6 @@ $OrderDelivery = new OrderDelivery($connect);
                 <div class="modal-body">
 
                     <div id="add-order-messages"></div>
-
-                    <!-- /form-group-->
-                    <div class="form-group">
-                        <label for="orderStatus" class="col-sm-4 control-label">Client Name: </label>
-                        <label class="col-sm-1 control-label">: </label>
-                        <div class="col-sm-7">
-                            <select class="form-control" name="clientId" id="clientId">
-                              <?php foreach($OrderDelivery->clients($connect) as $client): ?>
-                                  <option value="<?=$client->client_id?>"><?=$client->name?></option>
-                              <?php endforeach ?>
-                            </select>
-                        </div>
-                    </div> <!-- /form-group-->
-
                     <div class="form-group">
                         <label for="orderName" class="col-sm-4 control-label">Delivery Date: </label>
                         <label class="col-sm-1 control-label">: </label>

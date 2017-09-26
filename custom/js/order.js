@@ -137,8 +137,7 @@ $(document).ready(function() {
 	      }
 	   	} // for
 
-
-			if(orderDate && clientName && clientContact && paid && discount && paymentType && paymentStatus) {
+			if(orderDate && clientName && clientContact && clientPO && paid && discount && paymentType && paymentStatus) {
 				if(validateProduct == true && validateQuantity == true) {
 					// create order button
 					// $("#createOrderBtn").button('loading');
@@ -149,7 +148,7 @@ $(document).ready(function() {
 						data: form.serialize(),
 						dataType: 'json',
 						success:function(response) {
-							console.log(response);
+              // response = JSON.parse(response);
 							// reset button
 							$("#createOrderBtn").button('reset');
 
@@ -173,18 +172,24 @@ $(document).ready(function() {
 							$(".submitButtonFooter").addClass('div-hide');
 							// remove the product row
 							$(".removeProductRowBtn").addClass('div-hide');
-
 							} else {
 								alert(response.messages);
 							}
-						} // /response
+						}, // /response,
+            error: function(err) {
+						  console.log(err);
+						  
+            }
 					}); // /ajax
 				} // if array validate is true
 			} // /if field validate is true
 
 
+      
 			return false;
 		}); // /create order form function
+
+
 	} else if(divRequest == 'manord') {
 		// top nav child bar
 		$('#topNavManageOrder').addClass('active');
@@ -324,14 +329,13 @@ $(document).ready(function() {
 						data: form.serialize(),
 						dataType: 'json',
 						success:function(response) {
-							console.log(response);
 							// reset button
 							$("#editOrderBtn").button('reset');
 
 							$(".text-danger").remove();
 							$('.form-group').removeClass('has-error').removeClass('has-success');
 
-							if(response.success == true) {
+							if(response.success === true) {
 
 								// create order button
 								$(".success-messages").html('<div class="alert alert-success">'+
@@ -372,6 +376,8 @@ $(document).ready(function() {
       data: {po: po},
       dataType: 'json',
       success: function(response) {
+        console.log(po);
+        console.log(response);
       	var th = response.headers.map(function(header) {
 					return "<th>" + header + "</th>"
       	});
@@ -387,9 +393,13 @@ $(document).ready(function() {
       	$("#OrderDeliveryTable thead tr").empty().append(th);
       	$("#OrderDeliveryTable tbody").empty().append(tbody);
       	$("#divTable").show();
+      },
+      error: function(err) {
+        console.log(err);
       }
     });
 
+  return false;
   });
 
 	$("#saveOrderModalBtn").click(function(e) {
@@ -397,7 +407,7 @@ $(document).ready(function() {
 		addOrder();
 	});
 
-	$("#clientNameDropdown").change(function() {
+	$("#clientName").change(function() {
 
     $.ajax({
       url: 'php_action/fetchClient.php',
@@ -711,7 +721,7 @@ function paidAmount() {
 
 function resetOrderForm() {
 	// reset the input field
-	$("#createOrderForm")[0].reset();
+	$("#createOrderForm").find("input[type=text], select").val("");
 	// remove remove text danger
 	$(".text-danger").remove();
 	// remove form group error
@@ -739,7 +749,7 @@ function removeOrder(orderId = null) {
 						// hide modal
 						$("#removeOrderModal").modal('hide');
 						// success messages
-            alertMessage(response.messages);
+            alertMessage(response.messages, response.success);
 
 					} else {
 						// error messages

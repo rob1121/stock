@@ -9,7 +9,7 @@ $result = $connect->query($sql);
 
 $output = array('data' => array());
 
-if($result->num_rows > 0) {
+if($result !== false) {
 
  $paymentStatus = "";
  $x = 1;

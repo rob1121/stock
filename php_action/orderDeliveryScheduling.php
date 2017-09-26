@@ -186,9 +186,9 @@ private $connect;
       if($productResult !== false) {
         $x = 0;
         while($data = $productResult->fetch_assoc()) {
-          $productRow[$x]['product_id'] = $data['product_id'];
+          $productRow[$x]['product_id'] = (int)$data['product_id'];
           $productRow[$x]['product_name'] = $data['product_name'];
-          $productRow[$x]['rate'] = $data['rate'];
+          $productRow[$x]['rate'] = (int)$data['rate'];
           $x++;
         }
       }
