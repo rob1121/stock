@@ -1,5 +1,4 @@
 var manageOrderTable;
-var OrderDeliveryTable;
 var productIdForDelivery;
 var orderIDForDelivery;
  var po = null; //purchase order
@@ -370,6 +369,7 @@ $(document).ready(function() {
 
 	$("#manageOrderTable").on('click', '.poNumberBtn', function() {
 		po = $(this).data('po');
+		
 		updateScheduleTableDelivery();
 
   return false;

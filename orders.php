@@ -63,7 +63,6 @@ $OrderDelivery = new OrderDelivery($connect);
           <div class="success-messages"></div> <!--/success-messages-->
 
           <form class="form-horizontal" method="POST" action="php_action/createOrder.php" id="createOrderForm">
-              <input type="hidden" id="clientContact" name="clientContact" />
               <div class="form-group">
                   <label for="orderDate" class="col-sm-2 control-label">Order Date</label>
                   <div class="col-sm-10">
@@ -82,6 +81,12 @@ $OrderDelivery = new OrderDelivery($connect);
                       </select>
                   </div>
               </div> <!-- /form-group-->
+              <div class="form-group">
+                  <label for="clientContact" class="col-sm-2 control-label">Client Contact</label>
+                  <div class="col-sm-10">
+                      <input type="text" class="form-control" id="clientContact" name="clientContact" autocomplete="off" />
+                  </div>
+              </div> <!--/form-group-->
               <div class="form-group">
                   <label for="clientPO" class="col-sm-2 control-label">OP Number</label>
                   <div class="col-sm-10">

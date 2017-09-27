@@ -20,8 +20,47 @@ if($_POST) {
   $paymentType      = $_POST['paymentType'];
   $paymentStatus    = $_POST['paymentStatus'];
 
+  $checkPOSql = sprintf("SELECT * from orders WHERE po_number = '%s'", $clientPO);
+  if ($connect->query($checkPOSql) !== false) {
+    $valid = array('success' => false, 'messages' => "PO $clientPO already exist", 'order_id' => '');
+    echo json_encode($valid);
+    return false;
+  }
 
-	$sql = "INSERT INTO orders (order_date, client_name, client_contact, sub_total, vat, total_amount, discount, grand_total, paid, due, payment_type, payment_status, order_status, po_number) VALUES ('$orderDate', '$clientName', '$clientContact', '$subTotalValue', '$vatValue', '$totalAmountValue', '$discount', '$grandTotalValue', '$paid', '$dueValue', $paymentType, $paymentStatus, 1, '$clientPO')";
+  $columns = [
+    'order_date',
+    'client_name',
+    'client_contact',
+    'sub_total',
+    'vat',
+    'total_amount',
+    'discount',
+    'grand_total',
+    'paid',
+    'due',
+    'payment_type',
+    'payment_status',
+    'order_status',
+    'po_number',
+  ];
+
+	$sql = sprintf(
+	  "INSERT INTO orders (" . implode(", ", $columns) . ") VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %s, %s, %d, '%s')",
+    $orderDate,
+    $clientName,
+    $clientContact,
+    $subTotalValue,
+    $vatValue,
+    $totalAmountValue,
+    $discount,
+    $grandTotalValue,
+    $paid,
+    $dueValue,
+    $paymentType,
+    $paymentStatus,
+    1,
+    $clientPO
+  );
 
 	$orderStatus = false;
 	if($connect->query($sql) === true) {
