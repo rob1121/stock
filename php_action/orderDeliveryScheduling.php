@@ -101,7 +101,7 @@ private $connect;
    * @return array
    */
   function historyAsHeader($orderItems) {
-    $headers = array_unique(array_column($orderItems, 'order_date'));
+    $headers = array_unique(array_column($orderItems, 'delivery_date'));
     sort($headers);
     return array_map(function($header) {
       return $this->monthDate($header);
@@ -114,23 +114,22 @@ private $connect;
    * @param $headers
    * @return array
    */
-  function addQuantityPerDate($product, $headers) {
-    $product['orders'] = array_map(function($item) use(&$product, $headers) {
-      $item = (array)$item;
-      $product['orderItems'] = array_map(function($orderItem) use($headers) {
+  function addQuantityPerDate($scheduleDeliveries, $headers) {
+    $retVal = [];
 
-        foreach($headers as $date) {
-          $orderItem[$this->dateKey($date['modified'])] = count($orderItem) ? $orderItem['quantity'] : "-";
+    array_map(function($date) use(&$scheduleDeliveries, &$retVal) {
+      $retVal[static::dateKey($date['modified'])] = 0;
+    }, $headers);
+
+    array_map(function($date) use(&$scheduleDeliveries, &$retVal) {
+      foreach($scheduleDeliveries as $sched) {
+        if ($date['orig'] === $sched['delivery_date']) {
+          $retVal[static::dateKey($date['modified'])] += (int)$sched['quantity'];
         }
+      }
+    }, $headers);
 
-        return $orderItem;
-      }, $product['orderItems']);
-      $item = (object)$item;
-
-      return $item;
-    }, $product['orders']);
-
-    return $product;
+    return $retVal;
   }
 
   function getProducts($productIds) {
@@ -166,11 +165,13 @@ private $connect;
     $orders = $this->getOrdersByPo($po);
     $orderItems = $this->getORderItemByOrderIds(array_column($orders, 'order_id'));
     $products = $this->getProductById(array_column($orderItems, 'product_id'));
+    $schedule = $this->scheduleDeliver($po, array_column($orders, 'order_id')[0], array_column($orderItems, 'product_id'));
 
     return [
       "orders" => $orders,
       "orderItems" => $orderItems,
       "products" => $products,
+      "schedulerDeliver" => $schedule,
     ];
   }
 
@@ -199,7 +200,7 @@ private $connect;
   function getOrdersByPo($po) {
     $row = [];
     if ($po)  {
-      $sql = "SELECT order_id, order_date, client_name, client_contact, payment_status, po_number FROM orders WHERE order_status = 1 AND po_number = '" . trim($po) . "'";
+      $sql = "SELECT order_id, order_date, client_name, client_contact, payment_status, po_number, remarks FROM orders WHERE order_status = 1 AND po_number = '" . trim($po) . "'";
       $result = $this->connect->query($sql);
       if($result !== false) {
         $x = 0;
@@ -210,6 +211,7 @@ private $connect;
           $row[$x]['client_contact'] = $data['client_contact'];
           $row[$x]['payment_status'] = (int)$data['payment_status'];
           $row[$x]['po_number'] = $data['po_number'];
+          $row[$x]['remarks'] = $data['remarks'];
           $x++;
         }
       }
@@ -241,6 +243,17 @@ private $connect;
       }
     }
     return array_filter($orderItemRow);
+  }
+
+  function scheduleDeliver($po, $order_id, $product_ids) {
+  $selectDeliverSchedule = sprintf("SELECT * FROM delivery_schedule WHERE po_number = '%s' AND product_id IN (%s) AND order_id = %s", $po, implode(', ', $product_ids), $order_id);
+  $deliveryScheduleResult = $this->connect->query($selectDeliverSchedule);
+  $deliverySchedule = [];
+ if ($deliveryScheduleResult)
+  while($deliverySchedule[] = $deliveryScheduleResult->fetch_assoc());
+
+ return array_filter($deliverySchedule);
+
   }
 }
 ?>

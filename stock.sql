@@ -1,8 +1,8 @@
 -- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               10.2.3-MariaDB-log - mariadb.org binary distribution
--- Server OS:                    Win32
--- HeidiSQL Version:             9.4.0.5174
+-- Host:                         localhost
+-- Server version:               10.2.6-MariaDB-log - mariadb.org binary distribution
+-- Server OS:                    Win64
+-- HeidiSQL Version:             9.4.0.5125
 -- --------------------------------------------------------
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -74,14 +74,37 @@ CREATE TABLE IF NOT EXISTS `clients` (
   `contact` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`client_id`),
   KEY `searchable` (`contact`,`name`,`address`,`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
 
 -- Dumping data for table stock.clients: ~7 rows (approximately)
 /*!40000 ALTER TABLE `clients` DISABLE KEYS */;
 INSERT INTO `clients` (`client_id`, `name`, `address`, `status`, `contact`) VALUES
-	(9, 'John', 'Imus', 1, '288'),
-	(6, 'rob', 'dasma', 1, '9232111111');
+	(4, '1', '1', 1, '1'),
+	(1, 'John Doe', 'jd@gmail.com', 1, '9123411111'),
+	(7, 'Jay', 'Cavite', 1, '9231323432'),
+	(5, 'John Doe', 'jd@gmail.com', 1, '9232323222'),
+	(6, 'John Smith', 'Dasm', 1, '9232922222'),
+	(2, 'John Doe', 'jd@gmail.com', 1, '9233312321'),
+	(3, 'John Doe', 'jd@gmail.com', 1, '9234123123');
 /*!40000 ALTER TABLE `clients` ENABLE KEYS */;
+
+-- Dumping structure for table stock.delivery_schedule
+CREATE TABLE IF NOT EXISTS `delivery_schedule` (
+  `delivery_id` int(11) NOT NULL AUTO_INCREMENT,
+  `product_id` int(11) DEFAULT 0,
+  `po_number` varchar(50) DEFAULT '0',
+  `order_id` int(11) DEFAULT 0,
+  `delivery_date` date DEFAULT NULL,
+  `quantity` int(11) DEFAULT 0,
+  PRIMARY KEY (`delivery_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1;
+
+-- Dumping data for table stock.delivery_schedule: ~2 rows (approximately)
+/*!40000 ALTER TABLE `delivery_schedule` DISABLE KEYS */;
+INSERT INTO `delivery_schedule` (`delivery_id`, `product_id`, `po_number`, `order_id`, `delivery_date`, `quantity`) VALUES
+	(3, 7, '1', 16, '2017-09-28', 1),
+	(7, 7, '1', 16, '2017-09-28', 1);
+/*!40000 ALTER TABLE `delivery_schedule` ENABLE KEYS */;
 
 -- Dumping structure for table stock.orders
 CREATE TABLE IF NOT EXISTS `orders` (
@@ -99,27 +122,30 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `payment_type` int(11) NOT NULL,
   `payment_status` int(11) NOT NULL,
   `order_status` int(11) NOT NULL DEFAULT 0,
+  `po_number` varchar(25) DEFAULT NULL,
+  `remarks` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`order_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
 
--- Dumping data for table stock.orders: ~5 rows (approximately)
+-- Dumping data for table stock.orders: ~16 rows (approximately)
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` (`order_id`, `order_date`, `client_name`, `client_contact`, `sub_total`, `vat`, `total_amount`, `discount`, `grand_total`, `paid`, `due`, `payment_type`, `payment_status`, `order_status`) VALUES
-	(1, '2016-07-15', 'John Doe', '9807867564', '2700.00', '351.00', '3051.00', '1000.00', '2051.00', '1000.00', '1051.00', 2, 2, 2),
-	(2, '2016-07-15', 'John Doe', '9808746573', '3400.00', '442.00', '3842.00', '500.00', '3342.00', '3342', '0', 2, 1, 2),
-	(3, '2016-07-16', 'John Doe', '9809876758', '3600.00', '468.00', '4068.00', '568.00', '3500.00', '3500', '0', 2, 1, 2),
-	(4, '2016-08-01', 'Indra', '19208130', '1200.00', '156.00', '1356.00', '1000.00', '356.00', '356', '0.00', 2, 1, 2),
-	(5, '2016-07-16', 'John Doe', '9808767689', '3600.00', '468.00', '4068.00', '500.00', '3568.00', '3568', '0', 2, 1, 1),
-	(11, '2017-09-27', '124', '1', '15000', '1950', '16950', '0', '16950', '0', '16950', 1, 2, 1),
-	(12, '2017-09-28', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
-	(13, '2017-09-29', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
-	(14, '2017-09-27', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
-	(15, '2017-09-27', '124', '1', '3000', '390', '3390', '0', '3390', '0', '3390', 1, 2, 1),
-	(16, '2017-09-27', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
-	(17, '2017-09-26', '124', '1', '1500', '195', '1695', '0', '1695', '0', '1695', 1, 2, 1),
-	(18, '2017-09-27', '124', '1', '7500', '975', '8475', '0', '8475', '0', '8475', 1, 2, 1),
-	(19, '2017-09-26', '124', '1', '6000', '780', '6780', '0', '6780', '0', '6780', 1, 2, 1),
-	(20, '2017-09-27', '124', '1', '1200', '156', '1356', '0', '1356', '0', '1356', 1, 2, 1);
+INSERT INTO `orders` (`order_id`, `order_date`, `client_name`, `client_contact`, `sub_total`, `vat`, `total_amount`, `discount`, `grand_total`, `paid`, `due`, `payment_type`, `payment_status`, `order_status`, `po_number`, `remarks`) VALUES
+	(1, '2016-07-15', 'John Doe', '9807867564', '2700.00', '351.00', '3051.00', '1000.00', '2051.00', '1000.00', '1051.00', 2, 2, 2, '1', NULL),
+	(2, '2016-07-15', 'John Doe', '9808746573', '3400.00', '442.00', '3842.00', '500.00', '3342.00', '3342', '0', 2, 1, 2, '2', NULL),
+	(3, '2016-07-16', 'John Doe', '9809876758', '3600.00', '468.00', '4068.00', '568.00', '3500.00', '3500', '0', 2, 1, 2, '3', NULL),
+	(4, '2016-08-01', 'Indra', '19208130', '1200.00', '156.00', '1356.00', '1000.00', '356.00', '356', '0.00', 2, 1, 2, '4', NULL),
+	(5, '2016-07-16', 'John Doe', '9808767689', '3600.00', '468.00', '4068.00', '500.00', '3568.00', '3568', '0', 2, 1, 2, '5', NULL),
+	(6, '2017-09-28', '1', '9123411111', '3600.00', '468.00', '4068.00', '0', '4068.00', '0', '4068.00', 2, 3, 2, '123456', NULL),
+	(7, '2017-09-28', '1', '9123411111', '3600.00', '468.00', '4068.00', '0', '4068.00', '0', '4068.00', 2, 3, 2, '123456', NULL),
+	(8, '2017-09-28', '6', '9232922222', '4800.00', '624.00', '5424.00', '0', '5424.00', '0', '5424.00', 2, 3, 2, '321', NULL),
+	(9, '2017-09-27', '7', '9231323432', '3600.00', '468.00', '4068.00', '1', '4067.00', '1', '4066.00', 2, 3, 2, '14344', NULL),
+	(10, '2017-09-28', '7', '9231323432', '3600.00', '468.00', '4068.00', '1', '4067.00', '1', '4066.00', 2, 2, 2, '1', NULL),
+	(11, '2017-09-28', '2', '9233312321', '3600.00', '468.00', '4068.00', '1', '4067.00', '1', '4066.00', 2, 1, 2, '111', NULL),
+	(12, '2017-09-28', '7', '9231323432', '3600.00', '468.00', '4068.00', '1', '4067.00', '1', '4066.00', 2, 1, 2, '1', NULL),
+	(13, '2017-09-28', '1', '9123411111', '1200.00', '156.00', '1356.00', '1', '1355.00', '1', '1354.00', 2, 1, 2, '1', NULL),
+	(14, '2017-09-13', '6', '9232922222', '1200.00', '156.00', '1356.00', '1', '1355.00', '1', '1354.00', 1, 2, 2, '11', NULL),
+	(15, '2017-09-28', '7', '9231323432', '2400.00', '312.00', '2712.00', '1', '2711.00', '1', '2710.00', 2, 1, 2, '11111111111', NULL),
+	(16, '2017-09-28', '7', '9231323432', '2400.00', '312.00', '2712.00', '1', '2711.00', '1', '2710.00', 2, 1, 1, '1', '1');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 
 -- Dumping structure for table stock.order_item
@@ -132,9 +158,9 @@ CREATE TABLE IF NOT EXISTS `order_item` (
   `total` varchar(255) NOT NULL,
   `order_item_status` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`order_item_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=latin1;
 
--- Dumping data for table stock.order_item: ~0 rows (approximately)
+-- Dumping data for table stock.order_item: ~27 rows (approximately)
 /*!40000 ALTER TABLE `order_item` DISABLE KEYS */;
 INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `quantity`, `rate`, `total`, `order_item_status`) VALUES
 	(1, 1, 1, '1', '1500', '1500.00', 2),
@@ -144,20 +170,26 @@ INSERT INTO `order_item` (`order_item_id`, `order_id`, `product_id`, `quantity`,
 	(5, 3, 5, '2', '1200', '2400.00', 2),
 	(6, 3, 6, '1', '1200', '1200.00', 2),
 	(7, 4, 5, '1', '1200', '1200.00', 2),
-	(8, 5, 7, '2', '1200', '2400.00', 1),
-	(9, 5, 8, '1', '1200', '1200.00', 1),
-	(10, 9, 1, '10', '1500', '15000', 2),
-	(11, 10, 1, '10', '1500', '15000', 2),
-	(12, 11, 1, '10', '1500', '15000', 2),
-	(13, 12, 1, '1', '1500', '1500', 2),
-	(14, 13, 1, '1', '1500', '1500', 2),
-	(15, 14, 1, '1', '1500', '1500', 2),
-	(16, 15, 1, '2', '1500', '3000', 2),
-	(17, 16, 1, '1', '1500', '1500', 2),
-	(18, 17, 1, '1', '1500', '1500', 2),
-	(19, 18, 1, '5', '1500', '7500', 2),
-	(20, 19, 2, '5', '1200', '6000', 2),
-	(21, 20, 2, '1', '1200', '1200', 2);
+	(8, 5, 7, '2', '1200', '2400.00', 2),
+	(9, 5, 8, '1', '1200', '1200.00', 2),
+	(10, 6, 8, '2', '1200', '2400.00', 2),
+	(11, 6, 7, '1', '1200', '1200.00', 2),
+	(12, 7, 8, '2', '1200', '2400.00', 2),
+	(13, 7, 7, '1', '1200', '1200.00', 2),
+	(14, 8, 7, '3', '1200', '3600.00', 2),
+	(15, 8, 8, '1', '1200', '1200.00', 2),
+	(16, 9, 7, '2', '1200', '2400.00', 2),
+	(17, 9, 8, '1', '1200', '1200.00', 2),
+	(18, 10, 7, '2', '1200', '2400.00', 2),
+	(19, 10, 8, '1', '1200', '1200.00', 2),
+	(20, 11, 8, '1', '1200', '1200.00', 2),
+	(21, 11, 7, '2', '1200', '2400.00', 2),
+	(22, 12, 7, '2', '1200', '2400.00', 2),
+	(23, 12, 8, '1', '1200', '1200.00', 2),
+	(24, 13, 7, '1', '1200', '1200.00', 2),
+	(25, 14, 7, '1', '1200', '1200.00', 2),
+	(26, 15, 7, '2', '1200', '2400.00', 2),
+	(27, 16, 7, '2', '1200', '2400.00', 1);
 /*!40000 ALTER TABLE `order_item` ENABLE KEYS */;
 
 -- Dumping structure for table stock.product
@@ -174,7 +206,7 @@ CREATE TABLE IF NOT EXISTS `product` (
   PRIMARY KEY (`product_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
 
--- Dumping data for table stock.product: ~0 rows (approximately)
+-- Dumping data for table stock.product: ~8 rows (approximately)
 /*!40000 ALTER TABLE `product` DISABLE KEYS */;
 INSERT INTO `product` (`product_id`, `product_name`, `product_image`, `brand_id`, `categories_id`, `quantity`, `rate`, `active`, `status`) VALUES
 	(1, 'Half pant', '../assests/images/stock/2847957892502c7200.jpg', 1, 2, '19', '1500', 2, 2),
@@ -183,8 +215,8 @@ INSERT INTO `product` (`product_id`, `product_name`, `product_image`, `brand_id`
 	(4, 'T-Shirt', '../assests/images/stock/12299578927ace94c5.jpg', 6, 3, '29', '1000', 2, 2),
 	(5, 'Half Pant', '../assests/images/stock/24937578929c13532e.jpg', 8, 5, '17', '1200', 2, 2),
 	(6, 'Polo T-Shirt', '../assests/images/stock/10222578929f733dbf.jpg', 9, 5, '29', '1200', 2, 2),
-	(7, 'Half Pant', '../assests/images/stock/1770257893463579bf.jpg', 11, 7, '28', '1200', 1, 1),
-	(8, 'Polo T-shirt', '../assests/images/stock/136715789347d1aea6.jpg', 12, 7, '9', '1200', 1, 1);
+	(7, 'Half Pant', '../assests/images/stock/1770257893463579bf.jpg', 11, 7, '9', '1200', 1, 1),
+	(8, 'Polo T-shirt', '../assests/images/stock/136715789347d1aea6.jpg', 12, 7, '0', '1200', 1, 1);
 /*!40000 ALTER TABLE `product` ENABLE KEYS */;
 
 -- Dumping structure for table stock.users

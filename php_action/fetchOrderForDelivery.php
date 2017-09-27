@@ -3,22 +3,32 @@ function dd($obj) {
   die(var_dump($obj));
 }
 
+
+function deliverySchedule($connect, $po, $productId, $orderId) {
+  $selectDeliverSchedule = sprintf("SELECT * FROM delivery_schedule WHERE po_number = '%s' AND product_id = %d AND order_id = %d", $po, $productId, $orderId);
+  $deliveryScheduleResult = $connect->query($selectDeliverSchedule);
+  $deliverySchedule = [];
+
+ if ($deliveryScheduleResult)
+    while($deliverySchedule[] = $deliveryScheduleResult->fetch_assoc());
+
+ return array_filter($deliverySchedule);
+}
+
 $output = array('data' => array());
+$_POST['po'] = '1';
 if (isset($_POST['po'])) {
   require_once 'core.php';
   require_once 'orderDeliveryScheduling.php';
 
   $OrderDelivery = new OrderDelivery($connect);
-  $product = $OrderDelivery->getRequiredproductPo($_POST['po']);
+  $products = $OrderDelivery->getRequiredproductPo($_POST['po']);
+  $historyHeaders = $OrderDelivery->historyAsHeader($products['schedulerDeliver']);
 
-  $historyHeaders = $OrderDelivery->historyAsHeader($product['orders']);
-
-  $products = $OrderDelivery->addQuantityPerDate($product, $historyHeaders);
-
-   $paymentStatus = "";
    $x = 1;
-  $output['data'] = array_map(function($item) use($products, &$x, $historyHeaders) {
+  $output['data'] = array_map(function($item) use($products, &$x, $historyHeaders, $connect, $OrderDelivery) {
     $prodIndex = array_search($item['product_id'], array_column($products['products'], 'product_id'));
+
     $retVal = [
       $x,
       $item['quantity'],
@@ -27,10 +37,11 @@ if (isset($_POST['po'])) {
       $item['rate'] * $item['quantity'],
     ];
 
-//    foreach($historyHeaders as $date) $retVal[] = $item[OrderDelivery::dateKey($date['modified'])];
-
-    // $retVal[] = $item['quantity'];
-    $retVal[] = '<button class="btn btn-default button1 editBtn" data-productid="<?= $item->product_id?>" data-toggle="modal" id="addOrderModalBtn" data-target="#addOrderModal"> <i class="glyphicon glyphicon-edit"></i> Edit </button>';
+    $scheduleDelivery = deliverySchedule($connect, $_POST['po'], $item['product_id'], $item['order_id']);
+    $scheds = $OrderDelivery->addQuantityPerDate($scheduleDelivery, $historyHeaders);
+   foreach($historyHeaders as $date) $retVal[] = $scheds[OrderDelivery::dateKey($date['modified'])];
+    $retVal[] = $products['orders'][0]['remarks'];
+    $retVal[] = '<button class="btn btn-default button1 editBtn" data-orderid="' .$item['order_id'] .'" data-productid="' .$item['product_id'] .'" data-toggle="modal" data-target="#addOrderModal"> <i class="glyphicon glyphicon-edit"></i> Edit </button>';
 
     $x++;
     return $retVal;
@@ -54,7 +65,8 @@ if (isset($_POST['po'])) {
   $connect->close();
 
   $output["headers"] = ['#', 'Qty', 'Product name', 'Rate', 'Amount'];
-//  foreach($historyHeaders as $date) $output["headers"][] = $date['modified'];
+ foreach($historyHeaders as $date) $output["headers"][] = $date['modified'];
+  $output["headers"][] = 'remarks';
   $output["headers"][] = '';
 }
 

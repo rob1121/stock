@@ -1,61 +1,66 @@
 <?php
 
 require_once 'core.php';
+function maxQuantity($connect, $orderRemarks, $orderId, $productId) {
+  $selectQuantityOrderItem = sprintf("SELECT quantity, order_id, product_id from order_item WHERE order_id = %d AND product_id = %d", $orderId, $productId);
+  $resultSet = $connect->query($selectQuantityOrderItem);
+  $maxQuantity = 0;
+
+  while($data = $resultSet->fetch_assoc()) $maxQuantity += (int)$data['quantity'];
+
+  return $maxQuantity;
+}
+
+function deliveryCount($connect, $po, $productId, $orderId) {
+  $selectDeliverSchedule = sprintf("SELECT SUM(quantity) as total_quantity, po_number, product_id, order_id FROM delivery_schedule WHERE po_number = '%s' AND product_id = %d AND order_id = %d LIMIT 1", $po, $productId, $orderId);
+  $deliveryScheduleResult = $connect->query($selectDeliverSchedule);
+ if ($deliveryScheduleResult) {
+  while($deliverySchedule = $deliveryScheduleResult->fetch_assoc()) {
+    return $deliverySchedule ? $deliverySchedule['total_quantity'] : 0;
+  }
+ } else {
+  return 0;
+ }
+}
 
 $valid = array('success' => false, 'messages' => "Error updating...");
 
 if($_POST) {
-	$productId = $_POST['productId'];
-	$clientId     = $_POST['clientId'];
+  $orderId = $_POST['orderId'];
+  $po = $_POST['po'];
+  $productId = $_POST['productId'];
   $orderDeliveryDate = date('Y-m-d', strtotime($_POST['orderDeliveryDate']));
   $orderQuantity = $_POST['orderQuantity'];
   $orderRemarks = $_POST['orderRemarks'];
-  if (!($productId &&
-      $clientId  &&
-      $orderDeliveryDate &&
-      $orderQuantity &&
-      $orderRemarks))
-  {
+
+  if (!($productId && $orderId  && $po && $orderId && $orderDeliveryDate && $orderQuantity && $orderRemarks)) {
     $valid['messages'] = "invalid inputs";
     echo json_encode($valid);
-    return false;
-  }
-  $sql = "SELECT * from clients WHERE client_id = $clientId LIMIT 1";
-  $result = $connect->query($sql);
 
-  if ($result === false) {
-    $valid['messages'] = "invalid client found";
-    echo json_encode($valid);
-    return false;
-  }
-  $client = $result->fetch_object();
-
-  $sql = "SELECT * from product WHERE product_id = $productId LIMIT 1";
-  $result = $connect->query($sql);
-  if ($result === false) {
-    $valid['messages'] = "invalid product found";
-    echo json_encode($valid);
     return false;
   }
 
-  $product = $result->fetch_object();
+  $maxQuantity = maxQuantity($connect, $orderRemarks, $orderId, $productId);
+  $schedDeliveryQuantity = deliveryCount($connect, $po, $productId, $orderId);
+  $schedDeliveryQuantity += $orderQuantity;
 
-  $subTotal = $product->rate * $orderQuantity;
-  $vatValue = $subTotal * 0.13;
-  $totalAmountValue = $subTotal + $vatValue;
-  $discount = 0;
-  $grandTotal = $totalAmountValue - $discount;
-	$sql = "INSERT INTO orders (order_date, client_name, client_contact, sub_total, vat, total_amount, discount, grand_total, paid, due, payment_type, payment_status, order_status) VALUES('$orderDeliveryDate', '$client->name', '$client->contact', '$subTotal', '$vatValue', '$totalAmountValue', '$discount', '$grandTotal', 0, '$grandTotal', 2, 2, 1)";
-  if($connect->query($sql) === TRUE) {
-    $sql = "INSERT INTO order_item (order_id, product_id, quantity, rate, total, order_item_status) VALUES($connect->insert_id,$productId,$orderQuantity,$product->rate,$subTotal,2)";
-    $connect->query($sql);
+  if($schedDeliveryQuantity <= $maxQuantity) {
 
-    $sql = "UPDATE INTO order_item (order_id, product_id, quantity, rate, total, order_item_status) VALUES($connect->insert_id,$productId,$orderQuantity,$product->rate,$subTotal,2)";
+    $updateOrdersSql = "UPDATE orders SET remarks = '$orderRemarks' WHERE order_id = $orderId";
+    $connect->query($updateOrdersSql);
 
-    $connect->query($sql);
+    $deliveryScheduleSql = sprintf("INSERT INTO delivery_schedule (product_id, po_number, order_id, delivery_date,quantity) VALUES (%d,'%s',%d,'%s',%d)",
+      $productId, $po, $orderId, $orderDeliveryDate, $orderQuantity
+    );
+
+    $connect->query($deliveryScheduleSql);
     $valid['success'] = true;
     $valid['messages'] = "orders complete";
+  } else {
+    $valid['success'] = false;
+    $valid['messages'] = "Item to deliver is greater than required quantity";
   }
+
 	$connect->close();
 
 	echo json_encode($valid);

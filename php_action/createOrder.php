@@ -36,12 +36,12 @@ if($_POST) {
 	$orderItemStatus = false;
 
 	for($x = 0; $x < count($_POST['productName']); $x++) {
-		$updateProductQuantitySql = "SELECT product.quantity FROM product WHERE product.product_id = ".$_POST['productName'][$x]."";
+		$updateProductQuantitySql = "SELECT product_id, product.quantity FROM product WHERE product.product_id = ".$_POST['productName'][$x]."";
 		$updateProductQuantityData = $connect->query($updateProductQuantitySql);
 
 
 		while ($updateProductQuantityResult = $updateProductQuantityData->fetch_row()) {
-			$updateQuantity[$x] = $updateProductQuantityResult[0] - $_POST['quantity'][$x];
+			$updateQuantity[$x] = $updateProductQuantityResult[1] - $_POST['quantity'][$x];
 				// update product table
 				$updateProductTable = "UPDATE product SET quantity = '".$updateQuantity[$x]."' WHERE product_id = ".$_POST['productName'][$x]."";
 				$connect->query($updateProductTable);
@@ -51,7 +51,7 @@ if($_POST) {
 				VALUES ('$order_id', '".$_POST['productName'][$x]."', '".$_POST['quantity'][$x]."', '".$_POST['rateValue'][$x]."', '".$_POST['totalValue'][$x]."', 1)";
 
 				$connect->query($orderItemSql);
-
+        $order_item = $connect->insert_id;
 				if($x == count($_POST['productName'])) {
 					$orderItemStatus = true;
 				}

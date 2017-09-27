@@ -571,6 +571,7 @@ $OrderDelivery = new OrderDelivery($connect);
 <div class="modal fade" id="addOrderModal" tabindex="-1" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
+            <div id="orderDeliveryMessages"></div>
 
             <form class="form-horizontal" id="submitorderForm" action="php_action/createOrder.php" method="POST">
                 <div class="modal-header">
@@ -607,7 +608,7 @@ $OrderDelivery = new OrderDelivery($connect);
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal"> <i class="glyphicon glyphicon-remove-sign"></i> Close</button>
 
-                    <button type="submit" class="btn btn-primary" id="saveOrderModalBtn" data-loading-text="Loading..." autocomplete="off"> <i class="glyphicon glyphicon-ok-sign"></i> Save Changes</button>
+                    <button type="submit" class="btn btn-primary" id="deliverScheduleBtn" data-loading-text="Loading..." autocomplete="off"> <i class="glyphicon glyphicon-ok-sign"></i> Save Changes</button>
                 </div> <!-- /modal-footer -->
             </form> <!-- /.form -->
         </div> <!-- /modal-content -->

@@ -1,6 +1,7 @@
 var manageOrderTable;
 var OrderDeliveryTable;
 var productIdForDelivery;
+var orderIDForDelivery;
  var po = null; //purchase order
 
 $(document).ready(function() {
@@ -151,7 +152,6 @@ $(document).ready(function() {
               // response = JSON.parse(response);
 							// reset button
 							$("#createOrderBtn").button('reset');
-
 							$(".text-danger").remove();
 							$('.form-group').removeClass('has-error').removeClass('has-success');
 
@@ -178,14 +178,14 @@ $(document).ready(function() {
 						}, // /response,
             error: function(err) {
 						  console.log(err);
-						  
+
             }
 					}); // /ajax
 				} // if array validate is true
 			} // /if field validate is true
 
 
-      
+
 			return false;
 		}); // /create order form function
 
@@ -364,45 +364,18 @@ $(document).ready(function() {
 	}
 
 	$("#OrderDeliveryTable").on('click', '.editBtn', function() {
-    productIdForDelivery = $(this).data("productid");
+		productIdForDelivery = $(this).data("productid");
+		orderIDForDelivery   = $(this).data("orderid");
   });
 
 	$("#manageOrderTable").on('click', '.poNumberBtn', function() {
 		po = $(this).data('po');
-
-    $.ajax({
-      url: 'php_action/fetchOrderForDelivery.php',
-      type: 'post',
-      data: {po: po},
-      dataType: 'json',
-      success: function(response) {
-        console.log(po);
-        console.log(response);
-      	var th = response.headers.map(function(header) {
-					return "<th>" + header + "</th>"
-      	});
-
-      	var tbody = response.data.map(function(data) {
-      		var td = data.map(function(item) {
-      			return "<td>" + item + "</td>";
-      		});
-
-      		return "<tr>" + td + "</tr>";
-      	});
-
-      	$("#OrderDeliveryTable thead tr").empty().append(th);
-      	$("#OrderDeliveryTable tbody").empty().append(tbody);
-      	$("#divTable").show();
-      },
-      error: function(err) {
-        console.log(err);
-      }
-    });
+		updateScheduleTableDelivery();
 
   return false;
   });
 
-	$("#saveOrderModalBtn").click(function(e) {
+	$("#deliverScheduleBtn").click(function(e) {
 		e.preventDefault();
 		addOrder();
 	});
@@ -422,7 +395,6 @@ $(document).ready(function() {
       }
     });
   });
-
 }); // /documernt
 
 
@@ -721,7 +693,7 @@ function paidAmount() {
 
 function resetOrderForm() {
 	// reset the input field
-	$("#createOrderForm").find("input[type=text], select").val("");
+	$("#createOrderForm")[0].reset();
 	// remove remove text danger
 	$(".text-danger").remove();
 	// remove form group error
@@ -872,16 +844,16 @@ function paymentOrder(orderId = null) {
 }
 
 function addOrder() {
-  var clientId = $("#clientId").val();
   var orderDeliveryDate = $("#orderDeliveryDate").val();
   var orderQuantity = $("#orderQuantity").val();
   var orderRemarks = $("#orderRemarks").val();
-
+console.log(orderIDForDelivery);
 	$.ajax({
 		url: 'php_action/editOrderDelivery.php',
 		type: 'post',
 		data: {
-      clientId: clientId,
+      orderId: orderIDForDelivery,
+      po: po,
       productId: productIdForDelivery,
       orderDeliveryDate: orderDeliveryDate,
       orderQuantity: orderQuantity,
@@ -889,10 +861,23 @@ function addOrder() {
     },
 		dataType: 'json',
 		success:function(response) {
-			$("#addOrderModal").modal('hide');
 
-      alertMessage(response.messages, response.success);
-      location.reload();
+		  $("#orderDeliveryMessages").html('<div class="alert alert-'+(response.success ? 'success':'danger')+'">'+
+		    '<button type="button" class="close" data-dismiss="alert">&times;</button>'+
+		    '<strong><i class="glyphicon glyphicon-ok-sign"></i></strong> '+ response.messages +
+		    '</div>');
+
+		  // remove the mesages
+		  $(".alert-success").delay(500).show(10, function() {
+		    $(this).delay(3000).hide(10, function() {
+		      $(this).remove();
+					if(response.success) {
+						$("#addOrderModal").modal('hide');
+					}
+		    });
+		  }); // /.alert
+
+		  updateScheduleTableDelivery();
 		},
     error: function(err) {
 		  console.log(err);
@@ -913,5 +898,35 @@ function alertMessage(messages, success) {
       $(this).remove();
     });
   }); // /.alert
+}
 
+
+
+  function updateScheduleTableDelivery() {
+    $.ajax({
+      url: 'php_action/fetchOrderForDelivery.php',
+      type: 'post',
+      data: {po: po},
+      dataType: 'json',
+      success: function(response) {
+      	var th = response.headers.map(function(header) {
+					return "<th>" + header + "</th>"
+      	});
+
+      	var tbody = response.data.map(function(data) {
+      		var td = data.map(function(item) {
+      			return "<td>" + item + "</td>";
+      		});
+
+      		return "<tr>" + td + "</tr>";
+      	});
+
+      	$("#OrderDeliveryTable thead tr").empty().append(th);
+      	$("#OrderDeliveryTable tbody").empty().append(tbody);
+      	$("#divTable").show();
+      },
+      error: function(err) {
+        console.log(err);
+      }
+  });
 }
